@@ -10,8 +10,8 @@ import {
 } from "@nestjs/common";
 import { SignInDto } from "./dto/signIn.dto";
 import { AuthGuard } from "./auth.guard";
-import type { AuthService } from "./auth.service";
-import type { SignUpDto } from "./dto/signUp.dto";
+import { AuthService } from "./auth.service";
+import { SignUpDto } from "./dto/signUp.dto";
 import { LocalAuthGuard } from "./local-auth-guard";
 import { Public } from "./public.decorator";
 import {
@@ -42,6 +42,7 @@ export class AuthController {
 		return req.user;
 	}
 
+	@ApiBearerAuth()
 	@Post("logout")
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: "Đăng xuất" })

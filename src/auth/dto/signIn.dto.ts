@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from "class-validator";
 
 export class SignInDto {
 	@ApiProperty({
-		example: "admin",
+		example: "Admin",
 		description: "Tên đăng nhập của người dùng",
 	})
 	@IsString()
@@ -11,7 +11,7 @@ export class SignInDto {
 	username: string;
 
 	@ApiProperty({
-		example: "Password123!",
+		example: "Admin@123",
 		description: "Mật khẩu của người dùng",
 	})
 	@IsString()

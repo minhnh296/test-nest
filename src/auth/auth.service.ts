@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import type { JwtService } from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import type { UsersService } from "src/users/user.service";
+import { UsersService } from "src/users/user.service";
 import type {
 	SignInResponse,
 	SignOutResponse,
@@ -10,10 +10,16 @@ import type {
 
 @Injectable()
 export class AuthService {
+	private readonly blacklist = new Set<string>();
+
 	constructor(
 		private userService: UsersService,
 		private jwtService: JwtService,
 	) {}
+
+	isTokenBlacklisted(token: string): boolean {
+		return this.blacklist.has(token);
+	}
 
 	async signIn(username: string, pass: string): Promise<SignInResponse> {
 		const user = await this.userService.findOne(username);
@@ -30,8 +36,9 @@ export class AuthService {
 		}
 		const payload = { id: user.userId, username: user.username };
 		return {
-			message: "Đăng nhập thành công",
 			access_token: await this.jwtService.signAsync(payload),
+			message: "Đăng nhập thành công",
+			type: "bearer",
 		};
 	}
 
@@ -57,6 +64,7 @@ export class AuthService {
 	async signOut(access_token: string): Promise<SignOutResponse> {
 		try {
 			await this.jwtService.verifyAsync(access_token);
+			this.blacklist.add(access_token);
 			return {
 				message: "Đăng xuất thành công",
 			};

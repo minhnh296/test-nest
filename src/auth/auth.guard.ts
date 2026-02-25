@@ -4,17 +4,19 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from "@nestjs/common";
-import type { Reflector } from "@nestjs/core";
-import type { JwtService } from "@nestjs/jwt";
-import type { Request } from "express";
+import { Reflector } from "@nestjs/core";
+import { JwtService } from "@nestjs/jwt";
+import { Request } from "express";
 import { jwtConstants } from "./constant";
 import { IS_PUBLIC_KEY } from "./public.decorator";
+import { AuthService } from "./auth.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(
 		private jwtService: JwtService,
 		private reflector: Reflector,
+		private authService: AuthService,
 	) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,7 +32,7 @@ export class AuthGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const token = this.extractTokenFromHeader(request);
 
-		if (!token) {
+		if (!token || this.authService.isTokenBlacklisted(token)) {
 			throw new UnauthorizedException();
 		}
 

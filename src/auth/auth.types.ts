@@ -1,6 +1,7 @@
 export interface SignInResponse {
-	message: string;
 	access_token: string;
+	message: string;
+	type: string;
 }
 
 export interface SignUpResponse {

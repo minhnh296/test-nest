@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
 
 export class SignUpDto {
-	@ApiProperty({ example: "newuser", description: "Tên đăng nhập mới" })
+	@ApiProperty({ example: "Test", description: "Tên đăng nhập mới" })
 	@IsString()
 	@IsNotEmpty({ message: "Tên đăng nhập không được để trống" })
 	username: string;

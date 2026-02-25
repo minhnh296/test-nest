@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
+	app.enableCors();
 	const config = new DocumentBuilder()
 		.setTitle("Kim Thanh API")
 		.setDescription("Danh sách API cho hệ thống Kim Thanh")
