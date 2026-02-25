@@ -2,68 +2,55 @@ import { Injectable } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-
-export type User = {
-	userId: number;
-	username: string;
-	password: string;
-};
+import { PrismaService } from "../prisma.services";
 
 @Injectable()
 export class UsersService {
-	private readonly users = [
-		{
-			userId: 1,
-			username: "Admin",
-			password: bcrypt.hashSync("Admin@123", 10),
-		},
-		{
-			userId: 2,
-			username: "User",
-			password: bcrypt.hashSync("User@123", 10),
-		},
-	];
+	constructor(private prisma: PrismaService) {}
 
-	async findOne(username: string): Promise<User | undefined> {
-		return this.users.find((user) => user.username === username);
+	async findOne(username: string) {
+		return this.prisma.user.findUnique({
+			where: { username },
+		});
 	}
 
 	async create(createUserDto: CreateUserDto) {
-		const newUser = {
-			userId: this.users.length + 1,
-			username: createUserDto.username,
-			password: bcrypt.hashSync(createUserDto.password, 10),
-		};
-		this.users.push(newUser);
-		return newUser;
+		const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+		return this.prisma.user.create({
+			data: {
+				username: createUserDto.username,
+				password: hashedPassword,
+			},
+		});
 	}
 
-	findAll() {
-		return this.users;
+	async findAll() {
+		return this.prisma.user.findMany();
 	}
 
-	findById(id: number) {
-		return this.users.find((user) => user.userId === id);
+	async findById(id: number) {
+		return this.prisma.user.findUnique({
+			where: { id },
+		});
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto) {
-		const userIndex = this.users.findIndex((user) => user.userId === id);
-		if (userIndex === -1) return `User #${id} not found`;
+	async update(id: number, updateUserDto: UpdateUserDto) {
+		const hashedPassword = updateUserDto.password
+			? await bcrypt.hash(updateUserDto.password, 10)
+			: undefined;
 
-		if (updateUserDto.password) {
-			updateUserDto.password = bcrypt.hashSync(updateUserDto.password, 10);
-		}
-
-		this.users[userIndex] = { ...this.users[userIndex], ...updateUserDto };
-		return this.users[userIndex];
+		return this.prisma.user.update({
+			where: { id },
+			data: {
+				...updateUserDto,
+				...(hashedPassword ? { password: hashedPassword } : {}),
+			},
+		});
 	}
 
-	remove(id: number) {
-		const userIndex = this.users.findIndex((user) => user.userId === id);
-		if (userIndex === -1) return `User #${id} not found`;
-
-		const deletedUser = this.users[userIndex];
-		this.users.splice(userIndex, 1);
-		return deletedUser;
+	async remove(id: number) {
+		return this.prisma.user.delete({
+			where: { id },
+		});
 	}
 }
