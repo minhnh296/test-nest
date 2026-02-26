@@ -34,6 +34,11 @@ enum CustomerRanks {
   SILVER
 }
 
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+}
+
 model User {
   id         Int       @id @default(autoincrement())
   username   String    @unique
@@ -125,18 +130,33 @@ model Customer {
 }
 
 model Invoice {
-  id            Int       @id @default(autoincrement())
-  code          String    @unique
+  id            Int           @id @default(autoincrement())
+  code          String        @unique
   buyerId       Int
-  buyer         Customer  @relation(fields: [buyerId], references: [id])
+  buyer         Customer      @relation(fields: [buyerId], references: [id])
   employeeId    Int
-  employee      User      @relation(fields: [employeeId], references: [id])
+  employee      User          @relation(fields: [employeeId], references: [id])
   productId     Int
-  product       Inventory @relation(fields: [productId], references: [id])
-  total         Float     @default(0)
-  paymentMethod String
-  status        Status    @default(ACTIVE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  product       Inventory     @relation(fields: [productId], references: [id])
+  total         Float         @default(0)
+  paymentMethod PaymentMethod
+  status        Status        @default(ACTIVE)
+  warranty      Warranty?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   deletedAt     DateTime?
+}
+
+model Warranty {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  invoiceId   Int       @unique
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id])
+  startAt     DateTime  @default(now())
+  endAt       DateTime
+  description String?
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 }
