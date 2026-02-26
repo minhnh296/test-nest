@@ -1,18 +1,142 @@
 generator client {
-  provider        = "prisma-client"
-  output          = "../src/generated/prisma"
-  moduleFormat    = "cjs"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+  EMPLOYEE
+  STAFF
+  MANAGER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum InventoryStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  DEFECTIVE
+}
+
+enum CustomerRanks {
+  DIAMOND
+  PLATINUM
+  GOLD
+  SILVER
 }
 
 model User {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  email      String?   @unique
+  password   String
+  fullName   String?
+  avatar     String?
+  role       Role      @default(USER)
+  isActive   Boolean   @default(true)
+  salary     Float?
+  branchId   Int?
+  branch     Branch?   @relation(fields: [branchId], references: [id])
+  activities UserLog[]
+  invoices   Invoice[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
+
+model Branch {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  code      String    @unique
+  address   String?
+  phone     String?
+  email     String?
+  status    Status    @default(ACTIVE)
+  users     User[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model UserLog {
   id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+}
+
+model Warehouse {
+  id          String      @id @default(uuid())
+  name        String
+  code        String      @unique
+  phoneNum    String      @unique
+  address     String
+  map         String
+  status      Status      @default(ACTIVE)
+  inventories Inventory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Inventory {
+  id              Int             @id @default(autoincrement())
+  name            String
+  code            String          @unique
+  QRcode          String          @unique
+  color           String?
+  type            String
+  quantity        Int             @default(0)
+  price           String
+  status          InventoryStatus @default(IN_STOCK)
+  warehouseId     String?
+  warehouse       Warehouse?      @relation(fields: [warehouseId], references: [id])
+  invoices        Invoice[]
+  warrantyStartAt DateTime?
+  warrantyEndAt   DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+}
+
+model Customer {
+  id        Int           @id @default(autoincrement())
+  name      String
+  phoneNum  String        @unique
+  address   String?
+  dob       DateTime?
+  spent     Float         @default(0)
+  rank      CustomerRanks @default(SILVER)
+  history   String[]
+  invoices  Invoice[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deletedAt DateTime?
+}
+
+model Invoice {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique
+  buyerId       Int
+  buyer         Customer  @relation(fields: [buyerId], references: [id])
+  employeeId    Int
+  employee      User      @relation(fields: [employeeId], references: [id])
+  productId     Int
+  product       Inventory @relation(fields: [productId], references: [id])
+  total         Float     @default(0)
+  paymentMethod String
+  status        Status    @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 }
