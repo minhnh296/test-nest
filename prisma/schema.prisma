@@ -21,6 +21,12 @@ enum Status {
   INACTIVE
 }
 
+enum ProductStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
 enum InventoryStatus {
   IN_STOCK
   OUT_OF_STOCK
@@ -136,8 +142,8 @@ model Invoice {
   buyer         Customer      @relation(fields: [buyerId], references: [id])
   employeeId    Int
   employee      User          @relation(fields: [employeeId], references: [id])
-  productId     Int
-  product       Inventory     @relation(fields: [productId], references: [id])
+  itemId        Int
+  item          Inventory     @relation(fields: [itemId], references: [id])
   total         Float         @default(0)
   paymentMethod PaymentMethod
   status        Status        @default(ACTIVE)
@@ -159,4 +165,16 @@ model Warranty {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
+}
+
+model Product {
+  id        Int           @id @default(autoincrement())
+  code      String        @unique
+  name      String
+  type      String
+  mass      Float         @default(0)
+  status    ProductStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deletedAt DateTime?
 }
