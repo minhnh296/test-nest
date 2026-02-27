@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { UsersService } from "src/users/user.service";
+import { jwtConstants } from "./constant";
 import type {
 	SignInResponse,
 	SignOutResponse,
@@ -34,15 +35,22 @@ export class AuthService {
 				"Sai tài khoản, mật khẩu. Vui lòng đăng nhập lại",
 			);
 		}
-		const payload = { id: user.userId, username: user.username };
+		const payload = { id: user.id, username: user.username };
 		return {
 			access_token: await this.jwtService.signAsync(payload),
 			message: "Đăng nhập thành công",
 			type: "bearer",
+			expiresIn: jwtConstants.expiresIn,
+			user: {
+				fullName: user.fullName,
+				email: user.email,
+				role: user.role,
+				branch: user.branch?.name,
+			},
 		};
 	}
 
-	async signUp(username: string, pass: string): Promise<SignUpResponse> {
+	async signUp(username: string, pass: string, email: string): Promise<SignUpResponse> {
 		const existingUser = await this.userService.findOne(username);
 		if (existingUser) {
 			throw new UnauthorizedException(
@@ -52,11 +60,12 @@ export class AuthService {
 		const newUser = await this.userService.create({
 			username,
 			password: pass,
+			email,
 		});
 
 		return {
 			message: "Đăng ký thành công",
-			userId: newUser.userId,
+			userId: newUser.id,
 			username: newUser.username,
 		};
 	}
@@ -71,5 +80,13 @@ export class AuthService {
 		} catch (_error) {
 			throw new UnauthorizedException("Token không hợp lệ hoặc đã hết hạn");
 		}
+	}
+
+	async getProfile(userId: number) {
+		const user = await this.userService.findById(userId);
+		if (!user) {
+			throw new UnauthorizedException("Người dùng không tồn tại");
+		}
+		return user;
 	}
 }

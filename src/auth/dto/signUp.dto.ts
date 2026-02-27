@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 export class SignUpDto {
 	@ApiProperty({ example: "Test", description: "Tên đăng nhập mới" })
@@ -22,4 +22,20 @@ export class SignUpDto {
 		message: "Mật khẩu phải có ít nhất 1 ký tự đặc biệt",
 	})
 	password: string;
+
+	@ApiProperty({ example: "test@example.com", description: "Email đăng ký" })
+	@IsNotEmpty({ message: "Email không được để trống" })
+	@IsString()
+	@Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Email không đúng định dạng" })
+	email: string;
+
+	@ApiPropertyOptional({ example: "http://example.com", description: "Đăng ký ảnh đại diện" })
+	@IsString()
+	@IsOptional()
+	avatar?: string;
+
+	@ApiPropertyOptional({ example: "Nguyễn Test", description: "Đăng ký tên" })
+	@IsString()
+	@IsOptional()
+	fullName?: string;
 }

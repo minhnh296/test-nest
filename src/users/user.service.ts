@@ -9,8 +9,13 @@ export class UsersService {
 	constructor(private prisma: PrismaService) {}
 
 	async findOne(username: string) {
-		return this.prisma.user.findUnique({
-			where: { username },
+		return this.prisma.user.findFirst({
+			where: {
+				OR: [{ username }, { email: username }],
+			},
+			include: {
+				branch: true,
+			},
 		});
 	}
 
@@ -20,18 +25,30 @@ export class UsersService {
 			data: {
 				username: createUserDto.username,
 				password: hashedPassword,
+				email: createUserDto.email,
 			},
 		});
 	}
 
 	async findAll() {
-		return this.prisma.user.findMany();
+		const users = await this.prisma.user.findMany({
+			include: {
+				branch: true,
+			},
+		});
+		return users.map(({ password, branch, ...user }) => ({ ...user, branch: branch?.name }));
 	}
 
 	async findById(id: number) {
-		return this.prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({
 			where: { id },
+			include: {
+				branch: true,
+			},
 		});
+		if (!user) return null;
+		const { password, branch, ...rest } = user;
+		return { ...rest, branch: branch?.name };
 	}
 
 	async update(id: number, updateUserDto: UpdateUserDto) {

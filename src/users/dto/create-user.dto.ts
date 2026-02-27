@@ -1,13 +1,14 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, Matches, MinLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 export class CreateUserDto {
-	@ApiProperty({ example: "NewUser", description: "Tên đăng nhập mới" })
+	@ApiProperty({ example: "User", description: "Tên đăng nhập mới" })
 	@IsString()
+	@IsNotEmpty({ message: "Tên đăng nhập không được để trống" })
 	username!: string;
 
 	@ApiProperty({
-		example: "Password123!",
+		example: "User@123",
 		description:
 			"Mật khẩu (ít nhất 8 ký tự, 1 chữ hoa, 1 số, 1 ký tự đặc biệt)",
 	})
@@ -21,4 +22,20 @@ export class CreateUserDto {
 		message: "Mật khẩu phải có ít nhất 1 ký tự đặc biệt",
 	})
 	password!: string;
+
+	@ApiProperty({ example: "user@kimthanh.com", description: "Email người dùng" })
+	@IsNotEmpty({ message: "Email không được để trống" })
+	@IsString()
+	@Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Email không đúng định dạng" })
+	email!: string;
+
+	@ApiPropertyOptional({ example: "http://example.com", description: "Đăng ký ảnh đại diện" })
+	@IsString()
+	@IsOptional()
+	avatar?: string;
+
+	@ApiPropertyOptional({ example: "Nguyễn User", description: "Đăng ký tên" })
+	@IsString()
+	@IsOptional()
+	fullName?: string;
 }

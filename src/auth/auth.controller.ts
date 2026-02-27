@@ -31,7 +31,7 @@ export class AuthController {
 	@UseGuards(LocalAuthGuard)
 	@HttpCode(HttpStatus.OK)
 	@Post("login")
-	@ApiOperation({ summary: "Đăng nhập" })
+	@ApiOperation({ summary: "Đăng nhập (Dùng được cả bằng username và email)" })
 	@ApiBody({ type: SignInDto })
 	@ApiResponse({ status: 200, description: "Đăng nhập thành công" })
 	@ApiResponse({
@@ -59,7 +59,7 @@ export class AuthController {
 	@ApiResponse({ status: 201, description: "Tạo tài khoản thành công" })
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
 	async signUp(@Body() signUpDto: SignUpDto) {
-		return this.authService.signUp(signUpDto.username, signUpDto.password);
+		return this.authService.signUp(signUpDto.username, signUpDto.password, signUpDto.email);
 	}
 
 	@ApiBearerAuth()
@@ -72,6 +72,6 @@ export class AuthController {
 		description: "Token không hợp lệ hoặc không có quyền truy cập",
 	})
 	getProfile(@Request() req) {
-		return req.user;
+		return this.authService.getProfile(req.user.id);
 	}
 }
