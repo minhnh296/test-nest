@@ -7,7 +7,7 @@ export interface SignInResponse {
 		fullName: string | null;
 		email: string;
 		role: string;
-		branch?: string
+		branch?: string;
 	};
 }
 

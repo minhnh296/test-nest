@@ -6,14 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  ADMIN    @map("admin")
-  USER     @map("user")
-  EMPLOYEE @map("employee")
-  STAFF    @map("staff")
-  MANAGER  @map("manager")
-}
-
 enum Status {
   ACTIVE   @map("active")
   INACTIVE @map("inactive")
@@ -49,57 +41,77 @@ enum BranchType {
   WORKSHOP     @map("workshop")
 }
 
+enum PermissionAction {
+  VIEW        @map("view")
+  CREATE      @map("create")
+  EDIT        @map("edit")
+  DELETE      @map("delete")
+  APPROVE     @map("approve")
+  FULL_ACCESS @map("full_access")
+}
+
 model User {
-  id         Int       @id @default(autoincrement())
-  username   String
-  email      String
-  password   String
-  fullName   String?
-  avatar     String?
-  role       Role      @default(USER)
-  isActive   Boolean   @default(true) @map("is_active")
-  branchId   Int?
-  branch     Branch?   @relation(fields: [branchId], references: [id])
+  id       Int     @id @default(autoincrement())
+  username String
+  email    String
+  password String
+  fullName String?
+  avatar   String?
+  isActive Boolean @default(true) @map("is_active")
+
+  roleId Int?  @map("role_id")
+  role   Role? @relation(fields: [roleId], references: [id])
+
+  branchId Int?
+  branch   Branch? @relation(fields: [branchId], references: [id])
+
   activities UserLog[]
   invoices   Invoice[]
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
 model Branch {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  code      String     @unique
-  address   String?
-  phone     String?
-  type      BranchType @default(BRANCH)
-  status    Status     @default(ACTIVE)
-  users     User[]
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  deletedAt DateTime?  @map("deleted_at")
+  id      Int        @id @default(autoincrement())
+  name    String     @unique
+  code    String     @unique
+  address String?
+  phone   String?
+  type    BranchType @default(BRANCH)
+  status  Status     @default(ACTIVE)
+
+  users User[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 }
 
 model UserLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  action    String
-  details   String?
+  id      Int     @id @default(autoincrement())
+  action  String
+  details String?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now()) @map("created_at")
 }
 
 model Warehouse {
-  id          String      @id @default(uuid())
-  name        String
-  code        String      @unique
-  phoneNum    String      @unique
-  address     String
-  map         String
-  status      Status      @default(ACTIVE)
+  id       String @id @default(uuid())
+  name     String
+  code     String @unique
+  phoneNum String @unique
+  address  String
+  map      String
+  status   Status @default(ACTIVE)
+
   inventories Inventory[]
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
 model Inventory {
@@ -112,71 +124,117 @@ model Inventory {
   quantity        Int             @default(0)
   price           Float
   status          InventoryStatus @default(IN_STOCK)
-  warehouseId     String?         @map("warehouse_id")
-  warehouse       Warehouse?      @relation(fields: [warehouseId], references: [id])
-  invoices        Invoice[]
   warrantyStartAt DateTime?       @map("warranty_start_at")
   warrantyEndAt   DateTime?       @map("warranty_end_at")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-  deletedAt       DateTime?       @map("deleted_at")
+
+  warehouseId String?    @map("warehouse_id")
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  invoices Invoice[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 }
 
 model Customer {
-  id        Int           @id @default(autoincrement())
-  name      String
-  phoneNum  String        @unique @map("phone_num")
-  address   String?
-  dob       DateTime?
-  spent     Float         @default(0)
-  rank      CustomerRanks @default(SILVER)
-  history   String[]
-  invoices  Invoice[]
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  deletedAt DateTime?     @map("deleted_at")
+  id       Int           @id @default(autoincrement())
+  name     String
+  phoneNum String        @unique @map("phone_num")
+  address  String?
+  dob      DateTime?
+  spent    Float         @default(0)
+  rank     CustomerRanks @default(SILVER)
+  history  String[]
+
+  invoices Invoice[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 }
 
 model Invoice {
   id            Int           @id @default(autoincrement())
   code          String        @unique
-  buyerId       Int           @map("buyer_id")
-  buyer         Customer      @relation(fields: [buyerId], references: [id])
-  employeeId    Int           @map("employee_id")
-  employee      User          @relation(fields: [employeeId], references: [id])
-  itemId        Int           @map("item_id")
-  item          Inventory     @relation(fields: [itemId], references: [id])
   total         Float         @default(0)
   paymentMethod PaymentMethod @map("payment_method")
   status        Status        @default(ACTIVE)
-  warranty      Warranty?
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at")
+
+  buyerId Int      @map("buyer_id")
+  buyer   Customer @relation(fields: [buyerId], references: [id])
+
+  employeeId Int  @map("employee_id")
+  employee   User @relation(fields: [employeeId], references: [id])
+
+  itemId Int       @map("item_id")
+  item   Inventory @relation(fields: [itemId], references: [id])
+
+  warranty Warranty?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 }
 
 model Warranty {
-  id          Int       @id @default(autoincrement())
-  code        String    @unique
-  invoiceId   Int       @unique @map("invoice_id")
-  invoice     Invoice   @relation(fields: [invoiceId], references: [id])
-  startAt     DateTime  @default(now()) @map("start_at")
-  endAt       DateTime  @map("end_at")
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  startAt     DateTime @default(now()) @map("start_at")
+  endAt       DateTime @map("end_at")
   description String?
-  status      Status    @default(ACTIVE)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  status      Status   @default(ACTIVE)
+
+  invoiceId Int     @unique @map("invoice_id")
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 }
 
 model Product {
-  id        Int           @id @default(autoincrement())
-  code      String        @unique
-  name      String
-  type      String
-  mass      Float         @default(0)
-  status    ProductStatus @default(PENDING)
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  deletedAt DateTime?     @map("deleted_at")
+  id     Int           @id @default(autoincrement())
+  code   String        @unique
+  name   String
+  type   String
+  mass   Float         @default(0)
+  status ProductStatus @default(PENDING)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  users       User[]
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model RolePermission {
+  roleId Int  @map("role_id")
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  permissionId Int        @map("permission_id")
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
 }

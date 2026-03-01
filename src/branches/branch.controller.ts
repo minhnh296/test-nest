@@ -16,9 +16,11 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
+import { Roles } from "src/auth/roles.decorator";
 
 @ApiTags("Branches")
 @ApiBearerAuth()
+@Roles("admin")
 @Controller("branch")
 export class BranchesController {
 	constructor(private readonly branchesService: BranchesService) {}

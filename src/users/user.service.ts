@@ -15,6 +15,7 @@ export class UsersService {
 			},
 			include: {
 				branch: true,
+				role: true,
 			},
 		});
 	}
@@ -36,7 +37,10 @@ export class UsersService {
 				branch: true,
 			},
 		});
-		return users.map(({ password, branch, ...user }) => ({ ...user, branch: branch?.name }));
+		return users.map(({ password, branch, ...user }) => ({
+			...user,
+			branch: branch?.name,
+		}));
 	}
 
 	async findById(id: number) {

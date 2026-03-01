@@ -16,9 +16,11 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
+import { Roles } from "src/auth/roles.decorator";
 
 @ApiTags("Users")
 @ApiBearerAuth()
+@Roles("admin")
 @Controller("user")
 export class UsersController {
 	constructor(private readonly userService: UsersService) {}

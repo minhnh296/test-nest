@@ -5,6 +5,7 @@ import { PassportModule } from "@nestjs/passport";
 import { UserModule } from "src/users/user.module";
 import { AuthController } from "./auth.controller";
 import { AuthGuard } from "./auth.guard";
+import { RolesGuard } from "./roles.guard";
 import { AuthService } from "./auth.service";
 import { jwtConstants } from "./constant";
 import { LocalStrategy } from "./local.strategy";
@@ -25,6 +26,10 @@ import { LocalStrategy } from "./local.strategy";
 		{
 			provide: APP_GUARD,
 			useClass: AuthGuard,
+		},
+		{
+			provide: APP_GUARD,
+			useClass: RolesGuard,
 		},
 	],
 	controllers: [AuthController],

@@ -59,7 +59,11 @@ export class AuthController {
 	@ApiResponse({ status: 201, description: "Tạo tài khoản thành công" })
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
 	async signUp(@Body() signUpDto: SignUpDto) {
-		return this.authService.signUp(signUpDto.username, signUpDto.password, signUpDto.email);
+		return this.authService.signUp(
+			signUpDto.username,
+			signUpDto.password,
+			signUpDto.email,
+		);
 	}
 
 	@ApiBearerAuth()

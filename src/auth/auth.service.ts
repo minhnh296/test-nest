@@ -35,7 +35,11 @@ export class AuthService {
 				"Sai tài khoản, mật khẩu. Vui lòng đăng nhập lại",
 			);
 		}
-		const payload = { id: user.id, username: user.username };
+		const payload = {
+			id: user.id,
+			username: user.username,
+			role: user.role?.name || "",
+		};
 		return {
 			access_token: await this.jwtService.signAsync(payload),
 			message: "Đăng nhập thành công",
@@ -44,13 +48,17 @@ export class AuthService {
 			user: {
 				fullName: user.fullName,
 				email: user.email,
-				role: user.role,
-				branch: user.branch?.name,
+				role: user.role?.name ?? "",
+				branch: user.branch?.name ?? "",
 			},
 		};
 	}
 
-	async signUp(username: string, pass: string, email: string): Promise<SignUpResponse> {
+	async signUp(
+		username: string,
+		pass: string,
+		email: string,
+	): Promise<SignUpResponse> {
 		const existingUser = await this.userService.findOne(username);
 		if (existingUser) {
 			throw new UnauthorizedException(

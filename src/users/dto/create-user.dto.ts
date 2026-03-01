@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import {
+	IsNotEmpty,
+	IsOptional,
+	IsString,
+	Matches,
+	MinLength,
+} from "class-validator";
 
 export class CreateUserDto {
 	@ApiProperty({ example: "User", description: "Tên đăng nhập mới" })
@@ -23,13 +29,21 @@ export class CreateUserDto {
 	})
 	password!: string;
 
-	@ApiProperty({ example: "user@kimthanh.com", description: "Email người dùng" })
+	@ApiProperty({
+		example: "user@kimthanh.com",
+		description: "Email người dùng",
+	})
 	@IsNotEmpty({ message: "Email không được để trống" })
 	@IsString()
-	@Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Email không đúng định dạng" })
+	@Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+		message: "Email không đúng định dạng",
+	})
 	email!: string;
 
-	@ApiPropertyOptional({ example: "http://example.com", description: "Đăng ký ảnh đại diện" })
+	@ApiPropertyOptional({
+		example: "http://example.com",
+		description: "Đăng ký ảnh đại diện",
+	})
 	@IsString()
 	@IsOptional()
 	avatar?: string;
