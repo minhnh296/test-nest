@@ -6,6 +6,7 @@ import {
 	Patch,
 	Param,
 	Delete,
+	UseGuards,
 } from "@nestjs/common";
 import { BranchesService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
@@ -16,11 +17,11 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-import { Roles } from "src/auth/roles.decorator";
+import { BranchGuard } from "./guards/branch.guard";
 
 @ApiTags("Branches")
 @ApiBearerAuth()
-@Roles("admin")
+@UseGuards(BranchGuard)
 @Controller("branch")
 export class BranchesController {
 	constructor(private readonly branchesService: BranchesService) {}

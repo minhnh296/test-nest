@@ -6,6 +6,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	UseGuards,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -16,11 +17,11 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-import { Roles } from "src/auth/roles.decorator";
+import { UserGuard } from "./guards/user.guard";
 
 @ApiTags("Users")
 @ApiBearerAuth()
-@Roles("admin")
+@UseGuards(UserGuard)
 @Controller("user")
 export class UsersController {
 	constructor(private readonly userService: UsersService) {}

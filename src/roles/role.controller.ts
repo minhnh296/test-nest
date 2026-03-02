@@ -12,6 +12,7 @@ import { RoleService } from "./role.service";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
 import { CreatePermissionDto } from "./dto/create-permission.dto";
+import { AssignRoleDto } from "./dto/assign-role.dto";
 import {
 	ApiBearerAuth,
 	ApiBody,
@@ -19,21 +20,11 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-import { IsArray, IsInt } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-
-class AssignPermissionsDto {
-	@ApiProperty({
-		example: [1, 2, 3],
-		description: "Danh sách ID permissions",
-		type: [Number],
-	})
-	@IsArray()
-	@IsInt({ each: true })
-	permissionIds: number[];
-}
+import { Roles } from "src/auth/roles.decorator";
+import { AssignPermissionsDto } from "./dto/assign-permissions.dto";
 
 @ApiTags("Roles")
+@Roles("admin")
 @ApiBearerAuth()
 @Controller("role")
 export class RoleController {
@@ -115,5 +106,14 @@ export class RoleController {
 		@Body() body: AssignPermissionsDto,
 	) {
 		return this.roleService.assignPermissions(+id, body.permissionIds);
+	}
+
+	@Post("assign-user")
+	@Roles("admin")
+	@ApiOperation({ summary: "Gán Role cho User" })
+	@ApiResponse({ status: 200, description: "Gán role thành công" })
+	@ApiResponse({ status: 404, description: "Không tìm thấy User hoặc Role" })
+	assignUser(@Body() body: AssignRoleDto) {
+		return this.roleService.assignRoleToUser(body.userId, body.roleId);
 	}
 }

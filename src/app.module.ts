@@ -7,6 +7,9 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { BranchesModule } from "./branches/branch.module";
 import { RoleModule } from "./roles/role.module";
 import { AccountingAccountModule } from "./accounting-account/accounting-account.module";
+import { AuthGuard } from "./auth/auth.guard";
+import { RolesGuard } from "./auth/roles.guard";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
 	imports: [
@@ -18,6 +21,16 @@ import { AccountingAccountModule } from "./accounting-account/accounting-account
 		AccountingAccountModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [
+		AppService,
+		{
+			provide: APP_GUARD,
+			useClass: AuthGuard,
+		},
+		{
+			provide: APP_GUARD,
+			useClass: RolesGuard,
+		},
+	],
 })
 export class AppModule {}

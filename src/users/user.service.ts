@@ -21,26 +21,40 @@ export class UsersService {
 	}
 
 	async create(createUserDto: CreateUserDto) {
-		const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-		return this.prisma.user.create({
+		const { password, ...userData } = createUserDto;
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const user = await this.prisma.user.create({
 			data: {
-				username: createUserDto.username,
+				...userData,
 				password: hashedPassword,
-				email: createUserDto.email,
+			},
+			include: {
+				branch: true,
+				role: true,
 			},
 		});
+		const { password: _, ...rest } = user;
+		return {
+			...rest,
+			branch: user.branch?.name,
+			role: user.role?.name,
+		};
 	}
 
 	async findAll() {
 		const users = await this.prisma.user.findMany({
 			include: {
 				branch: true,
+				role: true,
 			},
 		});
-		return users.map(({ password, branch, ...user }) => ({
-			...user,
-			branch: branch?.name,
-		}));
+		return users.map(
+			({ password, branch, role, branchId, roleId, ...user }) => ({
+				...user,
+				branch: branch?.name,
+				role: role?.name,
+			}),
+		);
 	}
 
 	async findById(id: number) {
@@ -48,25 +62,42 @@ export class UsersService {
 			where: { id },
 			include: {
 				branch: true,
+				role: true,
 			},
 		});
 		if (!user) return null;
-		const { password, branch, ...rest } = user;
-		return { ...rest, branch: branch?.name };
+		const { password, branch, role, branchId, roleId, ...rest } = user;
+		return {
+			...rest,
+			branch: branch?.name,
+			role: role?.name,
+		};
 	}
 
 	async update(id: number, updateUserDto: UpdateUserDto) {
-		const hashedPassword = updateUserDto.password
-			? await bcrypt.hash(updateUserDto.password, 10)
+		const { password: rawPassword, ...userData } = updateUserDto;
+		const hashedPassword = rawPassword
+			? await bcrypt.hash(rawPassword, 10)
 			: undefined;
 
-		return this.prisma.user.update({
+		const user = await this.prisma.user.update({
 			where: { id },
 			data: {
-				...updateUserDto,
+				...userData,
 				...(hashedPassword ? { password: hashedPassword } : {}),
 			},
+			include: {
+				branch: true,
+				role: true,
+			},
 		});
+
+		const { password: _, ...rest } = user;
+		return {
+			...rest,
+			branch: user.branch?.name,
+			role: user.role?.name,
+		};
 	}
 
 	async remove(id: number) {

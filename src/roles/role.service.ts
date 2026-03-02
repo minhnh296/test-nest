@@ -23,7 +23,11 @@ export class RoleService {
 			throw new ConflictException(`Role với tên ${normalizedName} đã tồn tại`);
 		}
 
-		return this.prisma.role.create({
+		if (permissionIds?.length) {
+			await this.validatePermissions(permissionIds);
+		}
+
+		const role = await this.prisma.role.create({
 			data: {
 				...roleData,
 				name: normalizedName,
@@ -39,10 +43,15 @@ export class RoleService {
 				},
 			},
 		});
+
+		return {
+			...role,
+			permissions: role.permissions.map((p) => p.permission),
+		};
 	}
 
 	async findAll() {
-		return this.prisma.role.findMany({
+		const roles = await this.prisma.role.findMany({
 			orderBy: { createdAt: "desc" },
 			include: {
 				permissions: {
@@ -50,6 +59,11 @@ export class RoleService {
 				},
 			},
 		});
+
+		return roles.map((role) => ({
+			...role,
+			permissions: role.permissions.map((p) => p.permission),
+		}));
 	}
 
 	async findOne(id: number) {
@@ -64,7 +78,10 @@ export class RoleService {
 		if (!role) {
 			throw new NotFoundException(`Role với ID #${id} không tồn tại`);
 		}
-		return role;
+		return {
+			...role,
+			permissions: role.permissions.map((p) => p.permission),
+		};
 	}
 
 	async update(id: number, updateRoleDto: UpdateRoleDto) {
@@ -85,7 +102,11 @@ export class RoleService {
 			roleData.name = normalizedName;
 		}
 
-		return this.prisma.role.update({
+		if (permissionIds?.length) {
+			await this.validatePermissions(permissionIds);
+		}
+
+		const role = await this.prisma.role.update({
 			where: { id },
 			data: {
 				...roleData,
@@ -102,6 +123,11 @@ export class RoleService {
 				},
 			},
 		});
+
+		return {
+			...role,
+			permissions: role.permissions.map((p) => p.permission),
+		};
 	}
 
 	async remove(id: number) {
@@ -113,8 +139,13 @@ export class RoleService {
 
 	async assignPermissions(id: number, permissionIds: number[]) {
 		await this.findOne(id);
+
+		if (permissionIds?.length) {
+			await this.validatePermissions(permissionIds);
+		}
+
 		await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
-		return this.prisma.role.update({
+		const role = await this.prisma.role.update({
 			where: { id },
 			data: {
 				permissions: {
@@ -127,6 +158,11 @@ export class RoleService {
 				},
 			},
 		});
+
+		return {
+			...role,
+			permissions: role.permissions.map((p) => p.permission),
+		};
 	}
 
 	async createPermission(createPermissionDto: CreatePermissionDto) {
@@ -159,10 +195,47 @@ export class RoleService {
 			where: { id },
 		});
 		if (!permission) {
-			throw new NotFoundException(`Permission với ID #${id} không tồn tại`);
+			throw new NotFoundException(`Permission với ID ${id} không tồn tại`);
 		}
 		return this.prisma.permission.delete({
 			where: { id },
 		});
+	}
+
+	private async validatePermissions(permissionIds: number[]) {
+		const existingPermissions = await this.prisma.permission.findMany({
+			where: { id: { in: permissionIds } },
+			select: { id: true },
+		});
+
+		const existingIds = existingPermissions.map((p) => p.id);
+		const missingIds = permissionIds.filter((id) => !existingIds.includes(id));
+
+		if (missingIds.length > 0) {
+			throw new NotFoundException(
+				`Permission ID ${missingIds.join(", ")} không tồn tại trong hệ thống`,
+			);
+		}
+	}
+
+	async assignRoleToUser(userId: number, roleId: number) {
+		const user = await this.prisma.user.findUnique({ where: { id: userId } });
+		if (!user) {
+			throw new NotFoundException(`User với ID ${userId} không tồn tại`);
+		}
+
+		const role = await this.prisma.role.findUnique({ where: { id: roleId } });
+		if (!role) {
+			throw new NotFoundException(`Role với ID ${roleId} không tồn tại`);
+		}
+
+		const updatedUser = await this.prisma.user.update({
+			where: { id: userId },
+			data: { roleId },
+			include: { role: true },
+		});
+
+		const { password, ...rest } = updatedUser;
+		return rest;
 	}
 }

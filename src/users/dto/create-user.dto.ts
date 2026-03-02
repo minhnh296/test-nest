@@ -52,4 +52,12 @@ export class CreateUserDto {
 	@IsString()
 	@IsOptional()
 	fullName?: string;
+
+	@ApiPropertyOptional({ example: 2, description: "ID của Role" })
+	@IsOptional()
+	roleId?: number;
+
+	@ApiPropertyOptional({ example: 2, description: "ID của Chi nhánh" })
+	@IsOptional()
+	branchId?: number;
 }

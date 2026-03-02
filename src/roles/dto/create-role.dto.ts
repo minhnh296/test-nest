@@ -22,7 +22,7 @@ export class CreateRoleDto {
 	description?: string;
 
 	@ApiPropertyOptional({
-		example: [1, 2, 3],
+		example: [2, 3],
 		description: "Danh sách ID permissions gán cho role",
 		type: [Number],
 	})
