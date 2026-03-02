@@ -23,6 +23,7 @@ async function bootstrap() {
 			transform: true,
 		}),
 	);
-	await app.listen(process.env.PORT ?? 5000);
+	const port = process.env.PORT || process.env.LOCAL_PORT || 5000;
+	await app.listen(port);
 }
 bootstrap();

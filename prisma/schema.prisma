@@ -50,6 +50,26 @@ enum PermissionAction {
   FULL_ACCESS @map("full_access")
 }
 
+enum AccountNature {
+  DEBIT  @map("debit")
+  CREDIT @map("credit")
+  DUAL   @map("dual")
+}
+
+enum AttendanceStatus {
+  PRESENT     @map("present")
+  ABSENT      @map("absent")
+  LATE        @map("late")
+  EARLY_LEAVE @map("early_leave")
+}
+
+enum PayrollStatus {
+  PENDING  @map("pending")
+  APPROVED @map("approved")
+  PAID     @map("paid")
+}
+
+//-----//
 model User {
   id       Int     @id @default(autoincrement())
   username String
@@ -67,6 +87,9 @@ model User {
 
   activities UserLog[]
   invoices   Invoice[]
+
+  attendances Attendance[]
+  payrolls    Payroll[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -237,4 +260,58 @@ model RolePermission {
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
+}
+
+model AccountingAccount {
+  id            Int           @id @default(autoincrement())
+  accountNumber String        @unique @map("account_number")
+  name          String
+  nature        AccountNature
+  level         Int           @default(1)
+
+  parentId Int?                @map("parent_id")
+  parent   AccountingAccount?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children AccountingAccount[] @relation("AccountHierarchy")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Attendance {
+  id Int @id @default(autoincrement())
+
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id])
+
+  date            DateTime         @db.Date
+  checkIn         DateTime?        @map("check_in")
+  checkOut        DateTime?        @map("check_out")
+  status          AttendanceStatus @default(PRESENT)
+  note            String?
+  workingHours    Int              @default(0) @map("working_minutes")
+  overtimeMinutes Int              @default(0) @map("overtime_minutes")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Payroll {
+  id Int @id @default(autoincrement())
+
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id])
+
+  month       Int
+  year        Int
+  baseSalary  Float
+  bonus       Float         @default(0)
+  allowance   Float         @default(0)
+  deduction   Float         @default(0)
+  totalSalary Float         @map("total_salary")
+  status      PayrollStatus @default(PENDING)
+  paymentDate DateTime?     @map("payment_date")
+  note        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }

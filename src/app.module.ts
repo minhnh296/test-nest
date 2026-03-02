@@ -6,9 +6,17 @@ import { UserModule } from "./users/user.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { BranchesModule } from "./branches/branch.module";
 import { RoleModule } from "./roles/role.module";
+import { AccountingAccountModule } from "./accounting-account/accounting-account.module";
 
 @Module({
-	imports: [AuthModule, UserModule, PrismaModule, BranchesModule, RoleModule],
+	imports: [
+		AuthModule,
+		UserModule,
+		PrismaModule,
+		RoleModule,
+		BranchesModule,
+		AccountingAccountModule,
+	],
 	controllers: [AppController],
 	providers: [AppService],
 })

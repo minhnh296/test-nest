@@ -4,12 +4,13 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const PORT = process.env.PORT ?? 5000;
+const PORT = process.env.NGROK_PORT || 8000;
 const NGROK_TOKEN = process.env.NGROK_AUTHTOKEN ?? "";
 
-const nest = spawn("bun", ["run", "start:dev"], {
+const nest = spawn("bun", ["run", "start"], {
 	stdio: "inherit",
 	shell: true,
+	env: { ...process.env, PORT: PORT },
 });
 
 nest.on("error", (err) => {
