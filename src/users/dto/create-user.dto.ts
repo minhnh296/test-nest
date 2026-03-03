@@ -60,4 +60,26 @@ export class CreateUserDto {
 	@ApiPropertyOptional({ example: 2, description: "ID của Chi nhánh" })
 	@IsOptional()
 	branchId?: number;
+
+	@ApiPropertyOptional({ example: 10000000, description: "Lương cơ bản" })
+	@IsOptional()
+	baseSalary?: number;
+
+	@ApiPropertyOptional({ example: "Vietcombank", description: "Tên ngân hàng" })
+	@IsString()
+	@IsOptional()
+	bankName?: string;
+
+	@ApiPropertyOptional({
+		example: "1234567890",
+		description: "Số tài khoản ngân hàng",
+	})
+	@IsString()
+	@IsOptional()
+	bankAccount?: string;
+
+	@ApiPropertyOptional({ example: "8888888888", description: "Mã số thuế" })
+	@IsString()
+	@IsOptional()
+	taxCode?: string;
 }

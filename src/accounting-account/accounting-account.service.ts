@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma.services";
 import { CreateAccountingAccountDto } from "./dto/create-accounting-account.dto";
 import { UpdateAccountingAccountDto } from "./dto/update-accounting-account.dto";
@@ -15,7 +15,7 @@ export class AccountingAccountService {
 				where: { id: parentId },
 			});
 			if (!parentAccount) {
-				throw new NotFoundException(
+				throw new BadRequestException(
 					`Không tìm thấy tài khoản cha với ID ${parentId}`,
 				);
 			}
@@ -50,7 +50,7 @@ export class AccountingAccountService {
 		});
 
 		if (!account) {
-			throw new NotFoundException(`Không tìm thấy tài khoản với ID ${id}`);
+			throw new BadRequestException(`Không tìm thấy tài khoản với ID ${id}`);
 		}
 
 		return account;

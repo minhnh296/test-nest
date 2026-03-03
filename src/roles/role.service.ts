@@ -1,6 +1,6 @@
 import {
 	Injectable,
-	NotFoundException,
+	BadRequestException,
 	ConflictException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma.services";
@@ -76,7 +76,7 @@ export class RoleService {
 			},
 		});
 		if (!role) {
-			throw new NotFoundException(`Role với ID #${id} không tồn tại`);
+			throw new BadRequestException(`Role với ID #${id} không tồn tại`);
 		}
 		return {
 			...role,
@@ -195,7 +195,7 @@ export class RoleService {
 			where: { id },
 		});
 		if (!permission) {
-			throw new NotFoundException(`Permission với ID ${id} không tồn tại`);
+			throw new BadRequestException(`Permission với ID ${id} không tồn tại`);
 		}
 		return this.prisma.permission.delete({
 			where: { id },
@@ -212,7 +212,7 @@ export class RoleService {
 		const missingIds = permissionIds.filter((id) => !existingIds.includes(id));
 
 		if (missingIds.length > 0) {
-			throw new NotFoundException(
+			throw new BadRequestException(
 				`Permission ID ${missingIds.join(", ")} không tồn tại trong hệ thống`,
 			);
 		}
@@ -221,12 +221,12 @@ export class RoleService {
 	async assignRoleToUser(userId: number, roleId: number) {
 		const user = await this.prisma.user.findUnique({ where: { id: userId } });
 		if (!user) {
-			throw new NotFoundException(`User với ID ${userId} không tồn tại`);
+			throw new BadRequestException(`User với ID ${userId} không tồn tại`);
 		}
 
 		const role = await this.prisma.role.findUnique({ where: { id: roleId } });
 		if (!role) {
-			throw new NotFoundException(`Role với ID ${roleId} không tồn tại`);
+			throw new BadRequestException(`Role với ID ${roleId} không tồn tại`);
 		}
 
 		const updatedUser = await this.prisma.user.update({

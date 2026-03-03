@@ -3,7 +3,7 @@ import {
 	ExecutionContext,
 	ForbiddenException,
 	Injectable,
-	NotFoundException,
+	BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma.services";
 
@@ -22,7 +22,7 @@ export class BranchGuard implements CanActivate {
 		});
 
 		if (!branch) {
-			throw new NotFoundException(
+			throw new BadRequestException(
 				`Chi nhánh với ID #${branchId} không tồn tại`,
 			);
 		}

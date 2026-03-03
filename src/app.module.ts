@@ -7,8 +7,9 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { BranchesModule } from "./branches/branch.module";
 import { RoleModule } from "./roles/role.module";
 import { AccountingAccountModule } from "./accounting-account/accounting-account.module";
+import { AttendanceModule } from "./attendance/attendance.module";
 import { AuthGuard } from "./auth/auth.guard";
-import { RolesGuard } from "./auth/roles.guard";
+import { RolesGuard } from "./roles/guards/roles.guard";
 import { APP_GUARD } from "@nestjs/core";
 
 @Module({
@@ -19,6 +20,7 @@ import { APP_GUARD } from "@nestjs/core";
 		RoleModule,
 		BranchesModule,
 		AccountingAccountModule,
+		AttendanceModule,
 	],
 	controllers: [AppController],
 	providers: [

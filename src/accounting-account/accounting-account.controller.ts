@@ -13,12 +13,12 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-import { Roles } from "src/auth/roles.decorator";
+import { Roles } from "../roles/decorators/roles.decorator";
 import { AccountingAccountService } from "./accounting-account.service";
 import { CreateAccountingAccountDto } from "./dto/create-accounting-account.dto";
 import { UpdateAccountingAccountDto } from "./dto/update-accounting-account.dto";
 
-@ApiTags("Hệ thống tài khoản")
+@ApiTags("Accounting account")
 @ApiBearerAuth()
 @Controller("accounting-account")
 export class AccountingAccountController {
@@ -44,7 +44,7 @@ export class AccountingAccountController {
 	@Get(":id")
 	@ApiOperation({ summary: "Lấy thông tin chi tiết một tài khoản" })
 	@ApiResponse({ status: 200, description: "Thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy" })
 	findOne(@Param("id") id: string) {
 		return this.accountingAccountService.findOne(+id);
 	}

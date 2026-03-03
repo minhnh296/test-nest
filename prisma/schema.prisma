@@ -63,6 +63,11 @@ enum AttendanceStatus {
   EARLY_LEAVE @map("early_leave")
 }
 
+enum AttendanceType {
+  REGULAR
+  OVERTIME
+}
+
 enum PayrollStatus {
   PENDING  @map("pending")
   APPROVED @map("approved")
@@ -71,13 +76,17 @@ enum PayrollStatus {
 
 //-----//
 model User {
-  id       Int     @id @default(autoincrement())
-  username String
-  email    String
-  password String
-  fullName String?
-  avatar   String?
-  isActive Boolean @default(true) @map("is_active")
+  id          Int     @id @default(autoincrement())
+  username    String
+  email       String
+  password    String
+  fullName    String?
+  avatar      String?
+  isActive    Boolean @default(true) @map("is_active")
+  baseSalary  Float   @default(0) @map("base_salary")
+  bankName    String? @map("bank_name")
+  bankAccount String? @map("bank_account")
+  taxCode     String? @map("tax_code")
 
   roleId Int?  @map("role_id")
   role   Role? @relation(fields: [roleId], references: [id])
@@ -290,6 +299,7 @@ model Attendance {
   note            String?
   workingHours    Int              @default(0) @map("working_minutes")
   overtimeMinutes Int              @default(0) @map("overtime_minutes")
+  type            AttendanceType   @default(REGULAR)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -311,6 +321,18 @@ model Payroll {
   status      PayrollStatus @default(PENDING)
   paymentDate DateTime?     @map("payment_date")
   note        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Setting {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
+  value       String
+  type        String  @default("string")
+  group       String?
+  description String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

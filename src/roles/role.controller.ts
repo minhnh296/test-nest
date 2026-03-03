@@ -20,7 +20,7 @@ import {
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-import { Roles } from "src/auth/roles.decorator";
+import { Roles } from "./decorators/roles.decorator";
 import { AssignPermissionsDto } from "./dto/assign-permissions.dto";
 
 @ApiTags("Roles")
@@ -65,7 +65,7 @@ export class RoleController {
 	@Delete("permission/:id")
 	@ApiOperation({ summary: "Xóa permission" })
 	@ApiResponse({ status: 200, description: "Xóa permission thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy permission" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy permission" })
 	removePermission(@Param("id") id: string) {
 		return this.roleService.removePermission(+id);
 	}
@@ -73,7 +73,7 @@ export class RoleController {
 	@Get(":id")
 	@ApiOperation({ summary: "Lấy thông tin chi tiết role" })
 	@ApiResponse({ status: 200, description: "Thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy role" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
 	findOne(@Param("id") id: string) {
 		return this.roleService.findOne(+id);
 	}
@@ -82,7 +82,7 @@ export class RoleController {
 	@ApiOperation({ summary: "Cập nhật thông tin role" })
 	@ApiResponse({ status: 200, description: "Cập nhật role thành công" })
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy role" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
 	@ApiResponse({ status: 409, description: "Tên role đã tồn tại" })
 	update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto) {
 		return this.roleService.update(+id, updateRoleDto);
@@ -91,7 +91,7 @@ export class RoleController {
 	@Delete(":id")
 	@ApiOperation({ summary: "Xóa role" })
 	@ApiResponse({ status: 200, description: "Xóa role thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy role để xóa" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy role để xóa" })
 	remove(@Param("id") id: string) {
 		return this.roleService.remove(+id);
 	}
@@ -99,7 +99,7 @@ export class RoleController {
 	@Put(":id/permissions")
 	@ApiOperation({ summary: "Gán danh sách permissions cho role" })
 	@ApiResponse({ status: 200, description: "Gán permissions thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy role" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
 	@ApiBody({ type: AssignPermissionsDto })
 	assignPermissions(
 		@Param("id") id: string,
@@ -112,7 +112,7 @@ export class RoleController {
 	@Roles("admin")
 	@ApiOperation({ summary: "Gán Role cho User" })
 	@ApiResponse({ status: 200, description: "Gán role thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy User hoặc Role" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy User hoặc Role" })
 	assignUser(@Body() body: AssignRoleDto) {
 		return this.roleService.assignRoleToUser(body.userId, body.roleId);
 	}

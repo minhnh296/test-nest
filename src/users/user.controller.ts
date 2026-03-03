@@ -44,7 +44,7 @@ export class UsersController {
 	@Get(":id")
 	@ApiOperation({ summary: "Lấy thông tin chi tiết người dùng" })
 	@ApiResponse({ status: 200, description: "Thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy người dùng" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy người dùng" })
 	findOne(@Param("id") id: string) {
 		return this.userService.findById(+id);
 	}
@@ -53,7 +53,7 @@ export class UsersController {
 	@ApiOperation({ summary: "Cập nhật thông tin người dùng" })
 	@ApiResponse({ status: 200, description: "Cập nhật người dùng thành công" })
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy người dùng" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy người dùng" })
 	update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.update(+id, updateUserDto);
 	}
@@ -61,7 +61,7 @@ export class UsersController {
 	@Delete(":id")
 	@ApiOperation({ summary: "Xóa người dùng" })
 	@ApiResponse({ status: 200, description: "Xóa người dùng thành công" })
-	@ApiResponse({ status: 404, description: "Không tìm thấy người dùng để xóa" })
+	@ApiResponse({ status: 400, description: "Không tìm thấy người dùng để xóa" })
 	remove(@Param("id") id: string) {
 		return this.userService.remove(+id);
 	}

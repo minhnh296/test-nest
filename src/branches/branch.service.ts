@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { PrismaService } from "../prisma.services";
@@ -25,7 +25,7 @@ export class BranchesService {
 			where: { id, deletedAt: null },
 		});
 		if (!branch) {
-			throw new NotFoundException(`Chi nhánh với ID #${id} không tồn tại`);
+			throw new BadRequestException(`Chi nhánh với ID #${id} không tồn tại`);
 		}
 		return branch;
 	}

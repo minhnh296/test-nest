@@ -3,7 +3,7 @@ import {
 	ExecutionContext,
 	ForbiddenException,
 	Injectable,
-	NotFoundException,
+	BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma.services";
 
@@ -23,7 +23,7 @@ export class UserGuard implements CanActivate {
 		});
 
 		if (!targetUser) {
-			throw new NotFoundException(
+			throw new BadRequestException(
 				`Người dùng với ID #${targetUserId} không tồn tại`,
 			);
 		}
