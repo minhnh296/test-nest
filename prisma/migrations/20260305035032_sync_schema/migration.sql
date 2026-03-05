@@ -1,12 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `createdAt` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the column `updatedAt` on the `User` table. All the data in the column will be lost.
-  - Added the required column `email` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updated_at` to the `User` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('active', 'inactive');
 
@@ -28,20 +19,42 @@ CREATE TYPE "BranchType" AS ENUM ('headquarters', 'branch', 'workshop');
 -- CreateEnum
 CREATE TYPE "PermissionAction" AS ENUM ('view', 'create', 'edit', 'delete', 'approve', 'full_access');
 
--- DropIndex
-DROP INDEX "User_username_key";
+-- CreateEnum
+CREATE TYPE "AccountNature" AS ENUM ('debit', 'credit', 'dual');
 
--- AlterTable
-ALTER TABLE "User" DROP COLUMN "createdAt",
-DROP COLUMN "updatedAt",
-ADD COLUMN     "avatar" TEXT,
-ADD COLUMN     "branchId" INTEGER,
-ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "email" TEXT NOT NULL,
-ADD COLUMN     "fullName" TEXT,
-ADD COLUMN     "is_active" BOOLEAN NOT NULL DEFAULT true,
-ADD COLUMN     "role_id" INTEGER,
-ADD COLUMN     "updated_at" TIMESTAMP(3) NOT NULL;
+-- CreateEnum
+CREATE TYPE "AttendanceStatus" AS ENUM ('present', 'absent', 'late', 'early_leave');
+
+-- CreateEnum
+CREATE TYPE "AttendanceType" AS ENUM ('REGULAR', 'OVERTIME');
+
+-- CreateEnum
+CREATE TYPE "PayrollStatus" AS ENUM ('pending', 'approved', 'paid');
+
+-- CreateEnum
+CREATE TYPE "LogAction" AS ENUM ('login', 'logout', 'create', 'update', 'delete', 'export');
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "fullName" TEXT,
+    "avatar" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "is_super_admin" BOOLEAN NOT NULL DEFAULT false,
+    "base_salary" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "bank_name" TEXT,
+    "bank_account" TEXT,
+    "tax_code" TEXT,
+    "role_id" INTEGER,
+    "branchId" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Branch" (
@@ -60,14 +73,16 @@ CREATE TABLE "Branch" (
 );
 
 -- CreateTable
-CREATE TABLE "UserLog" (
+CREATE TABLE "ActivityLog" (
     "id" SERIAL NOT NULL,
-    "action" TEXT NOT NULL,
-    "details" TEXT,
-    "userId" INTEGER NOT NULL,
+    "action" "LogAction" NOT NULL,
+    "module" TEXT NOT NULL,
+    "target_id" INTEGER,
+    "details" JSONB,
+    "user_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "UserLog_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ActivityLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -201,6 +216,84 @@ CREATE TABLE "RolePermission" (
     CONSTRAINT "RolePermission_pkey" PRIMARY KEY ("role_id","permission_id")
 );
 
+-- CreateTable
+CREATE TABLE "AccountingAccount" (
+    "id" SERIAL NOT NULL,
+    "account_number" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "nature" "AccountNature" NOT NULL,
+    "level" INTEGER NOT NULL DEFAULT 1,
+    "parent_id" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AccountingAccount_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Attendance" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "date" DATE NOT NULL,
+    "check_in" TIMESTAMP(3),
+    "check_out" TIMESTAMP(3),
+    "status" "AttendanceStatus" NOT NULL DEFAULT 'present',
+    "note" TEXT,
+    "working_minutes" INTEGER NOT NULL DEFAULT 0,
+    "overtime_minutes" INTEGER NOT NULL DEFAULT 0,
+    "type" "AttendanceType" NOT NULL DEFAULT 'REGULAR',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Attendance_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Payroll" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "month" INTEGER NOT NULL,
+    "year" INTEGER NOT NULL,
+    "baseSalary" DOUBLE PRECISION NOT NULL,
+    "bonus" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "allowance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "deduction" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "total_salary" DOUBLE PRECISION NOT NULL,
+    "status" "PayrollStatus" NOT NULL DEFAULT 'pending',
+    "payment_date" TIMESTAMP(3),
+    "note" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Payroll_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Setting" (
+    "id" SERIAL NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'string',
+    "description" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Setting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GoldPrice" (
+    "id" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "buy" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "sell" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "latest_date" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "GoldPrice_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Branch_name_key" ON "Branch"("name");
 
@@ -240,6 +333,15 @@ CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 -- CreateIndex
 CREATE UNIQUE INDEX "Permission_name_key" ON "Permission"("name");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "AccountingAccount_account_number_key" ON "AccountingAccount"("account_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Setting_key_key" ON "Setting"("key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GoldPrice_type_key" ON "GoldPrice"("type");
+
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -247,7 +349,7 @@ ALTER TABLE "User" ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") RE
 ALTER TABLE "User" ADD CONSTRAINT "User_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserLog" ADD CONSTRAINT "UserLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Inventory" ADD CONSTRAINT "Inventory_warehouse_id_fkey" FOREIGN KEY ("warehouse_id") REFERENCES "Warehouse"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -269,3 +371,12 @@ ALTER TABLE "RolePermission" ADD CONSTRAINT "RolePermission_role_id_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "RolePermission" ADD CONSTRAINT "RolePermission_permission_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "Permission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccountingAccount" ADD CONSTRAINT "AccountingAccount_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "AccountingAccount"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payroll" ADD CONSTRAINT "Payroll_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

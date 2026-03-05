@@ -74,19 +74,29 @@ enum PayrollStatus {
   PAID     @map("paid")
 }
 
+enum LogAction {
+  LOGIN  @map("login")
+  LOGOUT @map("logout")
+  CREATE @map("create")
+  UPDATE @map("update")
+  DELETE @map("delete")
+  EXPORT @map("export")
+}
+
 //-----//
 model User {
-  id          Int     @id @default(autoincrement())
-  username    String
-  email       String
-  password    String
-  fullName    String?
-  avatar      String?
-  isActive    Boolean @default(true) @map("is_active")
-  baseSalary  Float   @default(0) @map("base_salary")
-  bankName    String? @map("bank_name")
-  bankAccount String? @map("bank_account")
-  taxCode     String? @map("tax_code")
+  id           Int     @id @default(autoincrement())
+  username     String
+  email        String
+  password     String
+  fullName     String?
+  avatar       String?
+  isActive     Boolean @default(true) @map("is_active")
+  isSuperAdmin Boolean @default(false) @map("is_super_admin")
+  baseSalary   Float   @default(0) @map("base_salary")
+  bankName     String? @map("bank_name")
+  bankAccount  String? @map("bank_account")
+  taxCode      String? @map("tax_code")
 
   roleId Int?  @map("role_id")
   role   Role? @relation(fields: [roleId], references: [id])
@@ -94,7 +104,7 @@ model User {
   branchId Int?
   branch   Branch? @relation(fields: [branchId], references: [id])
 
-  activities UserLog[]
+  activities ActivityLog[]
   invoices   Invoice[]
 
   attendances Attendance[]
@@ -120,12 +130,14 @@ model Branch {
   deletedAt DateTime? @map("deleted_at")
 }
 
-model UserLog {
-  id      Int     @id @default(autoincrement())
-  action  String
-  details String?
+model ActivityLog {
+  id       Int       @id @default(autoincrement())
+  action   LogAction
+  module   String
+  targetId Int?      @map("target_id")
+  details  Json?
 
-  userId Int
+  userId Int  @map("user_id")
   user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -331,9 +343,18 @@ model Setting {
   key         String  @unique
   value       String
   type        String  @default("string")
-  group       String?
   description String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model GoldPrice {
+  id         Int      @id @default(autoincrement())
+  type       String   @unique @map("type")
+  buy        Float    @default(0)
+  sell       Float    @default(0)
+  latestDate String?  @map("latest_date")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 }

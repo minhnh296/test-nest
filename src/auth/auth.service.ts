@@ -45,6 +45,7 @@ export class AuthService {
 			message: "Đăng nhập thành công",
 			type: "bearer",
 			expiresIn: jwtConstants.expiresIn,
+			isSuperAdmin: user.isSuperAdmin,
 			user: {
 				fullName: user.fullName,
 				email: user.email,
@@ -75,6 +76,7 @@ export class AuthService {
 			message: "Đăng ký thành công",
 			userId: newUser.id,
 			username: newUser.username,
+			email: newUser.email,
 		};
 	}
 

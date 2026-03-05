@@ -33,7 +33,7 @@ export class UsersService {
 				role: true,
 			},
 		});
-		const { password: _, ...rest } = user;
+		const { password: _pw, isSuperAdmin: _isa, ...rest } = user;
 		return {
 			...rest,
 			branch: user.branch?.name,
@@ -41,15 +41,41 @@ export class UsersService {
 		};
 	}
 
-	async findAll() {
+	async findAll(currentUser?: {
+		id: number;
+		role: string;
+		isSuperAdmin: boolean;
+	}) {
+		const whereClause: import("@prisma/client").Prisma.UserWhereInput = {};
+
+		if (currentUser?.role !== "ADMIN" && !currentUser?.isSuperAdmin) {
+			whereClause.isSuperAdmin = false;
+			whereClause.role = {
+				is: {
+					name: {
+						notIn: ["ADMIN", "MANAGER"],
+					},
+				},
+			};
+		}
+
 		const users = await this.prisma.user.findMany({
+			where: whereClause,
 			include: {
 				branch: true,
 				role: true,
 			},
 		});
 		return users.map(
-			({ password, branch, role, branchId, roleId, ...user }) => ({
+			({
+				password,
+				isSuperAdmin,
+				branch,
+				role,
+				branchId,
+				roleId,
+				...user
+			}) => ({
 				...user,
 				branch: branch?.name,
 				role: role?.name,
@@ -66,7 +92,8 @@ export class UsersService {
 			},
 		});
 		if (!user) return null;
-		const { password, branch, role, branchId, roleId, ...rest } = user;
+		const { password, isSuperAdmin, branch, role, branchId, roleId, ...rest } =
+			user;
 		return {
 			...rest,
 			branch: branch?.name,
@@ -80,6 +107,17 @@ export class UsersService {
 			? await bcrypt.hash(rawPassword, 10)
 			: undefined;
 
+		if ("branchId" in userData) {
+			userData.branchId = userData.branchId
+				? Number(userData.branchId)
+				: (null as unknown as number);
+		}
+		if ("roleId" in userData) {
+			userData.roleId = userData.roleId
+				? Number(userData.roleId)
+				: (null as unknown as number);
+		}
+
 		const user = await this.prisma.user.update({
 			where: { id },
 			data: {
@@ -92,7 +130,7 @@ export class UsersService {
 			},
 		});
 
-		const { password: _, ...rest } = user;
+		const { password: _pw, isSuperAdmin: _isa, ...rest } = user;
 		return {
 			...rest,
 			branch: user.branch?.name,

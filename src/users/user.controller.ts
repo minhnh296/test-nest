@@ -6,6 +6,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Request,
 	UseGuards,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -37,8 +38,12 @@ export class UsersController {
 	@Get()
 	@ApiOperation({ summary: "Lấy danh sách tất cả người dùng" })
 	@ApiResponse({ status: 200, description: "Thành công" })
-	findAll() {
-		return this.userService.findAll();
+	findAll(
+		@Request() req: {
+			user: { id: number; role: string; isSuperAdmin: boolean };
+		},
+	) {
+		return this.userService.findAll(req.user);
 	}
 
 	@Get(":id")

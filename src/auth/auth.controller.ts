@@ -9,10 +9,9 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import { SignInDto } from "./dto/signIn.dto";
-import { AuthGuard } from "./auth.guard";
 import { AuthService } from "./auth.service";
 import { SignUpDto } from "./dto/signUp.dto";
-import { LocalAuthGuard } from "./local-auth-guard";
+import { LocalAuthGuard } from "./guard/local-auth-guard";
 import { Public } from "./public.decorator";
 import {
 	ApiBearerAuth,
@@ -67,7 +66,6 @@ export class AuthController {
 	}
 
 	@ApiBearerAuth()
-	@UseGuards(AuthGuard)
 	@Get("profile")
 	@ApiOperation({ summary: "getMe" })
 	@ApiResponse({ status: 200, description: "Thành công" })
