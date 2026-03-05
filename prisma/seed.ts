@@ -269,6 +269,62 @@ async function main() {
 			});
 		}
 		console.log("Đã mock xong Hệ thống tài khoản kế toán.");
+
+		const settings = [
+			{
+				key: "BHXH_PERCENT",
+				value: "0.08",
+				type: "number",
+				description: "Tỷ lệ đóng bảo hiểm xã hội (nhân viên)",
+			},
+			{
+				key: "BHYT_PERCENT",
+				value: "0.015",
+				type: "number",
+				description: "Tỷ lệ đóng bảo hiểm y tế (nhân viên)",
+			},
+			{
+				key: "BHTN_PERCENT",
+				value: "0.01",
+				type: "number",
+				description: "Tỷ lệ đóng bảo hiểm thất nghiệp (nhân viên)",
+			},
+			{
+				key: "PERSONAL_PIT_DEDUCTION",
+				value: "11000000",
+				type: "number",
+				description: "Giảm trừ gia cảnh bản thân (VNĐ)",
+			},
+			{
+				key: "DEPENDENT_PIT_DEDUCTION",
+				value: "4400000",
+				type: "number",
+				description: "Giảm trừ gia cảnh người phụ thuộc (VNĐ)",
+			},
+			{
+				key: "OVERTIME_MULTIPLIER_NORMAL",
+				value: "1.5",
+				type: "number",
+				description: "Hệ số lương tăng ca ngày thường",
+			},
+			{
+				key: "OVERTIME_MULTIPLIER_WEEKEND",
+				value: "2.0",
+				type: "number",
+				description: "Hệ số lương tăng ca cuối tuần",
+			},
+			{
+				key: "SYSTEM_NAME",
+				value: "Kim Thanh Jewelry Management",
+				type: "string",
+				description: "Tên hệ thống chuyên dụng",
+			},
+		];
+
+		await prisma.setting.createMany({
+			data: settings,
+		});
+		console.log("Đã mock xong bảng Setting.");
 	} catch (error) {
 		console.error("Lỗi khi seeding:", error);
 	}

@@ -3,6 +3,8 @@ import { HttpService } from "@nestjs/axios";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { firstValueFrom } from "rxjs";
 import { PrismaService } from "../prisma.services";
+import { CreateGoldPriceDto } from "./dto/create-gold-price.dto";
+import { UpdateGoldPriceDto } from "./dto/update-gold-price.dto";
 
 @Injectable()
 export class GoldPriceService {
@@ -16,14 +18,15 @@ export class GoldPriceService {
 		private readonly prisma: PrismaService,
 	) {}
 
-	@Cron(CronExpression.EVERY_MINUTE)
+	@Cron(CronExpression.EVERY_HOUR)
 	async handleCron() {
 		await this.syncSjcPrices();
 	}
 
 	async getPricesFromDb() {
 		return this.prisma.goldPrice.findMany({
-			orderBy: { id: "asc" },
+			distinct: ["type"],
+			orderBy: [{ id: "asc" }],
 		});
 	}
 
@@ -35,20 +38,52 @@ export class GoldPriceService {
 	}) {
 		const { type, from, to, limit = 100 } = query;
 
-		const where: import("@prisma/client").Prisma.GoldPriceHistoryWhereInput =
-			{};
+		const where: import("@prisma/client").Prisma.GoldPriceWhereInput = {};
 		if (type) where.type = type;
 		if (from || to) {
-			where.date = {
+			where.createdAt = {
 				gte: from ? new Date(from) : undefined,
 				lte: to ? new Date(to) : undefined,
 			};
 		}
 
-		return this.prisma.goldPriceHistory.findMany({
+		return this.prisma.goldPrice.findMany({
 			where,
-			orderBy: { date: "desc" },
+			orderBy: { createdAt: "desc" },
 			take: Number(limit),
+		});
+	}
+
+	async findOne(id: number) {
+		return this.prisma.goldPrice.findUnique({
+			where: { id },
+		});
+	}
+
+	async create(data: CreateGoldPriceDto) {
+		return this.prisma.goldPrice.create({
+			data: {
+				type: data.type,
+				buy: data.buy,
+				sell: data.sell,
+				latestDate: new Date().toISOString(),
+			},
+		});
+	}
+
+	async update(id: number, data: UpdateGoldPriceDto) {
+		return this.prisma.goldPrice.update({
+			where: { id },
+			data: {
+				...data,
+				latestDate: new Date().toISOString(),
+			},
+		});
+	}
+
+	async remove(id: number) {
+		return this.prisma.goldPrice.delete({
+			where: { id },
 		});
 	}
 
@@ -66,7 +101,7 @@ export class GoldPriceService {
 			const { success, data, latestDate } = response.data;
 
 			if (success && Array.isArray(data)) {
-				const currentPrices = await this.prisma.goldPrice.findMany();
+				const currentPrices = await this.getPricesFromDb();
 				const priceMap = new Map(currentPrices.map((p) => [p.type, p]));
 
 				let updatedCount = 0;
@@ -77,29 +112,12 @@ export class GoldPriceService {
 					const sell = item.SellValue || 0;
 
 					if (!existing || existing.latestDate !== latestDate) {
-						await this.prisma.goldPrice.upsert({
-							where: {
-								type: item.TypeName,
-							},
-							update: {
-								buy,
-								sell,
-								latestDate,
-							},
-							create: {
-								type: item.TypeName,
-								buy,
-								sell,
-								latestDate,
-							},
-						});
-
-						await this.prisma.goldPriceHistory.create({
+						await this.prisma.goldPrice.create({
 							data: {
 								type: item.TypeName,
 								buy,
 								sell,
-								date: new Date(),
+								latestDate,
 							},
 						});
 						updatedCount++;
@@ -108,7 +126,7 @@ export class GoldPriceService {
 
 				if (updatedCount > 0) {
 					this.logger.log(
-						`Đã cập nhật ${updatedCount} loại vàng có thay đổi (Thời điểm: ${latestDate}).`,
+						`Đã lưu thêm ${updatedCount} bản ghi giá vàng mới (Thời điểm: ${latestDate}).`,
 					);
 				}
 

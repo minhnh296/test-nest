@@ -2,15 +2,29 @@ import {
 	Controller,
 	Get,
 	Post,
+	Patch,
+	Delete,
+	Param,
+	Body,
 	HttpException,
 	HttpStatus,
 	Query,
+	ParseIntPipe,
 } from "@nestjs/common";
 import { GoldPriceService } from "./gold-price.service";
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+	ApiOperation,
+	ApiQuery,
+	ApiResponse,
+	ApiTags,
+	ApiBearerAuth,
+} from "@nestjs/swagger";
 import { Public } from "../auth/public.decorator";
+import { CreateGoldPriceDto } from "./dto/create-gold-price.dto";
+import { UpdateGoldPriceDto } from "./dto/update-gold-price.dto";
 
 @ApiTags("Gold Price")
+@ApiBearerAuth()
 @Controller("gold-prices")
 export class GoldPriceController {
 	constructor(private readonly goldPriceService: GoldPriceService) {}
@@ -70,6 +84,60 @@ export class GoldPriceController {
 		} catch (error) {
 			throw new HttpException(
 				error.message || "Lỗi khi lấy lịch sử giá vàng",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+	}
+
+	@Post()
+	@ApiOperation({ summary: "Chủ nhập giá vàng tay" })
+	@ApiResponse({ status: 201, description: "Tạo thành công" })
+	async create(@Body() createGoldPriceDto: CreateGoldPriceDto) {
+		try {
+			return await this.goldPriceService.create(createGoldPriceDto);
+		} catch (error) {
+			throw new HttpException(
+				error.message || "Lỗi khi tạo giá vàng",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+	}
+
+	@Get(":id")
+	@ApiOperation({ summary: "Lấy chi tiết bản ghi giá vàng" })
+	@ApiResponse({ status: 201, description: "Tạo thành công" })
+	async findOne(@Param("id", ParseIntPipe) id: number) {
+		const result = await this.goldPriceService.findOne(id);
+		if (!result) {
+			throw new HttpException("Không tìm thấy", HttpStatus.NOT_FOUND);
+		}
+		return result;
+	}
+
+	@Patch(":id")
+	@ApiOperation({ summary: "Cập nhật bản ghi giá vàng" })
+	async update(
+		@Param("id", ParseIntPipe) id: number,
+		@Body() updateGoldPriceDto: UpdateGoldPriceDto,
+	) {
+		try {
+			return await this.goldPriceService.update(id, updateGoldPriceDto);
+		} catch (error) {
+			throw new HttpException(
+				error.message || "Lỗi khi cập nhật giá vàng",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+	}
+
+	@Delete(":id")
+	@ApiOperation({ summary: "Xóa bản ghi giá vàng" })
+	async remove(@Param("id", ParseIntPipe) id: number) {
+		try {
+			return await this.goldPriceService.remove(id);
+		} catch (error) {
+			throw new HttpException(
+				error.message || "Lỗi khi xóa giá vàng",
 				HttpStatus.INTERNAL_SERVER_ERROR,
 			);
 		}

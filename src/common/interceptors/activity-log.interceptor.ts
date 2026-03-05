@@ -4,8 +4,8 @@ import {
 	ExecutionContext,
 	CallHandler,
 } from "@nestjs/common";
-import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
+import { Observable, throwError } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
 import { PrismaService } from "../../prisma.services";
 import { LogAction, Prisma } from "@prisma/client";
 
@@ -34,24 +34,50 @@ export class ActivityLogInterceptor implements NestInterceptor {
 						}
 						const userId = request.user?.id || data?.userId || data?.user?.id;
 
-						if (!userId) return;
-
 						await this.prisma.activityLog.create({
 							data: {
-								userId: Number(userId),
+								userId: userId ? Number(userId) : null,
 								action,
+								isSuccess: true,
 								module:
 									moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
-								targetId: data?.id ? Number(data.id) : null,
 								details: {
 									url,
-									method,
+									ip: request.ip,
 								} as Prisma.InputJsonValue,
 							},
 						});
 					} catch (error) {
 						console.error("Lỗi khi ghi Activity Log:", error);
 					}
+				}),
+				catchError((error) => {
+					const moduleName = url.split("/")[1] || "System";
+					const userId = request.user?.id;
+
+					this.prisma.activityLog
+						.create({
+							data: {
+								action: url.includes("/auth/login")
+									? LogAction.LOGIN
+									: method === "PATCH"
+										? LogAction.UPDATE
+										: method === "DELETE"
+											? LogAction.DELETE
+											: LogAction.CREATE,
+								isSuccess: false,
+								module:
+									moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
+								userId: userId ? Number(userId) : null,
+								details: {
+									url,
+									ip: request.ip,
+								} as Prisma.InputJsonValue,
+							},
+						})
+						.catch((e) => console.error("Lỗi ghi log thất bại:", e));
+
+					return throwError(() => error);
 				}),
 			);
 		}

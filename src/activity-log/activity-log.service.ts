@@ -44,7 +44,6 @@ export class ActivityLogService {
 				include: {
 					user: {
 						select: {
-							id: true,
 							username: true,
 							fullName: true,
 						},
@@ -71,7 +70,6 @@ export class ActivityLogService {
 			include: {
 				user: {
 					select: {
-						id: true,
 						username: true,
 						fullName: true,
 					},
