@@ -8,13 +8,13 @@ import {
 } from "class-validator";
 
 export class CreateRoleDto {
-	@ApiProperty({ example: "admin", description: "Tên role (duy nhất)" })
+	@ApiProperty({ example: "test", description: "Tên role" })
 	@IsString()
 	@IsNotEmpty()
 	name: string;
 
 	@ApiPropertyOptional({
-		example: "Quản trị viên hệ thống",
+		example: "Kiểm thử",
 		description: "Mô tả role",
 	})
 	@IsString()
@@ -22,7 +22,7 @@ export class CreateRoleDto {
 	description?: string;
 
 	@ApiPropertyOptional({
-		example: [2, 3],
+		example: [2, 3, 4, 5, 6],
 		description: "Danh sách ID permissions gán cho role",
 		type: [Number],
 	})

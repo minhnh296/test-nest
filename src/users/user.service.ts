@@ -41,11 +41,23 @@ export class UsersService {
 		};
 	}
 
-	async findAll(currentUser?: {
-		id: number;
-		role: string;
-		isSuperAdmin: boolean;
-	}) {
+	async findAll(
+		currentUser?: {
+			id: number;
+			role: string;
+			isSuperAdmin: boolean;
+		},
+		query: {
+			search?: string;
+			page?: number;
+			limit?: number;
+			pageSize?: number;
+		} = {},
+	) {
+		const { page = 1, limit: queryLimit, pageSize, search } = query;
+		const limit = queryLimit || pageSize || 100;
+		const skip = (page - 1) * limit;
+
 		const whereClause: import("@prisma/client").Prisma.UserWhereInput = {};
 
 		if (currentUser?.role !== "ADMIN" && !currentUser?.isSuperAdmin) {
@@ -59,14 +71,27 @@ export class UsersService {
 			};
 		}
 
-		const users = await this.prisma.user.findMany({
-			where: whereClause,
-			include: {
-				branch: true,
-				role: true,
-			},
-		});
-		return users.map(
+		if (search) {
+			whereClause.username = {
+				contains: search,
+				mode: "insensitive",
+			};
+		}
+
+		const [users, total] = await Promise.all([
+			this.prisma.user.findMany({
+				where: whereClause,
+				include: {
+					branch: true,
+					role: true,
+				},
+				skip,
+				take: Number(limit),
+			}),
+			this.prisma.user.count({ where: whereClause }),
+		]);
+
+		const items = users.map(
 			({
 				password,
 				isSuperAdmin,
@@ -81,6 +106,13 @@ export class UsersService {
 				role: role?.name,
 			}),
 		);
+
+		return {
+			items,
+			total,
+			page: Number(page),
+			pageSize: Math.ceil(total / limit),
+		};
 	}
 
 	async findById(id: number) {

@@ -29,15 +29,59 @@ export class AccountingAccountService {
 		});
 	}
 
-	async findAll() {
-		return this.prisma.accountingAccount.findMany({
-			include: {
-				children: true,
-			},
-			orderBy: {
-				accountNumber: "asc",
-			},
-		});
+	async findAll(
+		query: {
+			search?: string;
+			page?: number;
+			limit?: number;
+			pageSize?: number;
+		} = {},
+	) {
+		const { page = 1, limit: queryLimit, pageSize, search } = query;
+		const limit = queryLimit || pageSize || 1000;
+		const skip = (page - 1) * limit;
+
+		const whereClause: import("@prisma/client").Prisma.AccountingAccountWhereInput =
+			{};
+
+		if (search) {
+			whereClause.OR = [
+				{
+					name: {
+						contains: search,
+						mode: "insensitive",
+					},
+				},
+				{
+					accountNumber: {
+						contains: search,
+						mode: "insensitive",
+					},
+				},
+			];
+		}
+
+		const [items, total] = await Promise.all([
+			this.prisma.accountingAccount.findMany({
+				where: whereClause,
+				include: {
+					children: true,
+				},
+				orderBy: {
+					accountNumber: "asc",
+				},
+				skip,
+				take: Number(limit),
+			}),
+			this.prisma.accountingAccount.count({ where: whereClause }),
+		]);
+
+		return {
+			items,
+			total,
+			page: Number(page),
+			pageSize: Math.ceil(total / limit),
+		};
 	}
 
 	async findOne(id: number) {

@@ -13,11 +13,45 @@ export class BranchesService {
 		});
 	}
 
-	async findAll() {
-		return this.prisma.branch.findMany({
-			where: { deletedAt: null },
-			orderBy: { createdAt: "desc" },
-		});
+	async findAll(
+		query: {
+			search?: string;
+			page?: number;
+			limit?: number;
+			pageSize?: number;
+		} = {},
+	) {
+		const { page = 1, limit: queryLimit, pageSize, search } = query;
+		const limit = queryLimit || pageSize || 100;
+		const skip = (page - 1) * limit;
+
+		const whereClause: import("@prisma/client").Prisma.BranchWhereInput = {
+			deletedAt: null,
+		};
+
+		if (search) {
+			whereClause.name = {
+				contains: search,
+				mode: "insensitive",
+			};
+		}
+
+		const [items, total] = await Promise.all([
+			this.prisma.branch.findMany({
+				where: whereClause,
+				skip,
+				take: Number(limit),
+				orderBy: { createdAt: "desc" },
+			}),
+			this.prisma.branch.count({ where: whereClause }),
+		]);
+
+		return {
+			items,
+			total,
+			page: Number(page),
+			pageSize: Math.ceil(total / limit),
+		};
 	}
 
 	async findOne(id: number) {

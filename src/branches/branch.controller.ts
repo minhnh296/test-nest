@@ -7,6 +7,7 @@ import {
 	Param,
 	Delete,
 	UseGuards,
+	Query,
 } from "@nestjs/common";
 import { BranchesService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
@@ -14,6 +15,7 @@ import { UpdateBranchDto } from "./dto/update-branch.dto";
 import {
 	ApiBearerAuth,
 	ApiOperation,
+	ApiQuery,
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
@@ -36,9 +38,18 @@ export class BranchesController {
 
 	@Get()
 	@ApiOperation({ summary: "Lấy danh sách tất cả chi nhánh" })
+	@ApiQuery({ name: "search", required: false, type: String })
+	@ApiQuery({ name: "page", required: false, type: Number })
+	@ApiQuery({ name: "limit", required: false, type: Number })
+	@ApiQuery({ name: "pageSize", required: false, type: Number })
 	@ApiResponse({ status: 200, description: "Thành công" })
-	findAll() {
-		return this.branchesService.findAll();
+	findAll(
+		@Query("search") search?: string,
+		@Query("page") page?: number,
+		@Query("limit") limit?: number,
+		@Query("pageSize") pageSize?: number,
+	) {
+		return this.branchesService.findAll({ search, page, limit, pageSize });
 	}
 
 	@Get(":id")

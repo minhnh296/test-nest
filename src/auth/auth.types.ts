@@ -5,6 +5,7 @@ export interface SignInResponse {
 	expiresIn: number;
 	isSuperAdmin: boolean;
 	user: {
+		id: number;
 		fullName: string | null;
 		email: string;
 		role: string;

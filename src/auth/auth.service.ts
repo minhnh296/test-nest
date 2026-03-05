@@ -47,6 +47,7 @@ export class AuthService {
 			expiresIn: jwtConstants.expiresIn,
 			isSuperAdmin: user.isSuperAdmin,
 			user: {
+				id: user.id,
 				fullName: user.fullName,
 				email: user.email,
 				role: user.role?.name ?? "",

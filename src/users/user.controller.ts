@@ -6,6 +6,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 	Request,
 	UseGuards,
 } from "@nestjs/common";
@@ -15,6 +16,7 @@ import { UsersService } from "./user.service";
 import {
 	ApiBearerAuth,
 	ApiOperation,
+	ApiQuery,
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
@@ -37,13 +39,26 @@ export class UsersController {
 
 	@Get()
 	@ApiOperation({ summary: "Lấy danh sách tất cả người dùng" })
+	@ApiQuery({ name: "search", required: false, type: String })
+	@ApiQuery({ name: "page", required: false, type: Number })
+	@ApiQuery({ name: "limit", required: false, type: Number })
+	@ApiQuery({ name: "pageSize", required: false, type: Number })
 	@ApiResponse({ status: 200, description: "Thành công" })
 	findAll(
 		@Request() req: {
 			user: { id: number; role: string; isSuperAdmin: boolean };
 		},
+		@Query("search") search?: string,
+		@Query("page") page?: number,
+		@Query("limit") limit?: number,
+		@Query("pageSize") pageSize?: number,
 	) {
-		return this.userService.findAll(req.user);
+		return this.userService.findAll(req.user, {
+			search,
+			page,
+			limit,
+			pageSize,
+		});
 	}
 
 	@Get(":id")

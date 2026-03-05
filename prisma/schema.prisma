@@ -358,3 +358,11 @@ model GoldPrice {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 }
+
+model GoldPriceHistory {
+  id   Int       @id @default(autoincrement())
+  type String    @map("type")
+  buy  Float     @default(0)
+  sell Float     @default(0)
+  date DateTime? @map("date")
+}
