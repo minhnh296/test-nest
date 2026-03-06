@@ -171,17 +171,18 @@ async function main() {
 		const todayStr = now.toISOString().split("T")[0];
 		const today = new Date(`${todayStr}T00:00:00.000Z`);
 		const yesterday = new Date(today.getTime() - 24 * 3600 * 1000);
+		const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 3600 * 1000);
 
 		await prisma.attendance.createMany({
 			data: [
 				{
 					userId: admin.id,
-					date: yesterday,
+					date: twoDaysAgo,
 					checkIn: new Date(
-						`${yesterday.toISOString().split("T")[0]}T08:00:00.000+07:00`,
+						`${twoDaysAgo.toISOString().split("T")[0]}T08:00:00.000+07:00`,
 					),
 					checkOut: new Date(
-						`${yesterday.toISOString().split("T")[0]}T17:30:00.000+07:00`,
+						`${twoDaysAgo.toISOString().split("T")[0]}T17:30:00.000+07:00`,
 					),
 					status: "PRESENT",
 					type: "REGULAR",
@@ -189,19 +190,21 @@ async function main() {
 				},
 				{
 					userId: admin.id,
-					date: today,
-					checkIn: new Date(`${todayStr}T08:15:00.000+07:00`),
+					date: yesterday,
+					checkIn: new Date(
+						`${yesterday.toISOString().split("T")[0]}T08:15:00.000+07:00`,
+					),
 					status: "LATE",
 					type: "REGULAR",
 				},
 				{
 					userId: userAcc.id,
-					date: yesterday,
+					date: twoDaysAgo,
 					checkIn: new Date(
-						`${yesterday.toISOString().split("T")[0]}T07:55:00.000+07:00`,
+						`${twoDaysAgo.toISOString().split("T")[0]}T07:55:00.000+07:00`,
 					),
 					checkOut: new Date(
-						`${yesterday.toISOString().split("T")[0]}T17:15:00.000+07:00`,
+						`${twoDaysAgo.toISOString().split("T")[0]}T17:15:00.000+07:00`,
 					),
 					status: "PRESENT",
 					type: "REGULAR",
@@ -209,8 +212,13 @@ async function main() {
 				},
 				{
 					userId: userAcc.id,
-					date: today,
-					checkIn: new Date(`${todayStr}T08:00:00.000+07:00`),
+					date: yesterday,
+					checkIn: new Date(
+						`${yesterday.toISOString().split("T")[0]}T08:00:00.000+07:00`,
+					),
+					checkOut: new Date(
+						`${twoDaysAgo.toISOString().split("T")[0]}T18:15:00.000+07:00`,
+					),
 					status: "PRESENT",
 					type: "REGULAR",
 				},

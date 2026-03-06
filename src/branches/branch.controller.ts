@@ -57,7 +57,7 @@ export class BranchesController {
 	@ApiResponse({ status: 200, description: "Thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy chi nhánh" })
 	findOne(@Param("id") id: string) {
-		return this.branchesService.findOne(+id);
+		return this.branchesService.findOne(id);
 	}
 
 	@Patch(":id")
@@ -66,7 +66,7 @@ export class BranchesController {
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy chi nhánh" })
 	update(@Param("id") id: string, @Body() updateBranchDto: UpdateBranchDto) {
-		return this.branchesService.update(+id, updateBranchDto);
+		return this.branchesService.update(id, updateBranchDto);
 	}
 
 	@Delete(":id")
@@ -74,6 +74,6 @@ export class BranchesController {
 	@ApiResponse({ status: 200, description: "Xóa chi nhánh thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy chi nhánh để xóa" })
 	remove(@Param("id") id: string) {
-		return this.branchesService.remove(+id);
+		return this.branchesService.remove(id);
 	}
 }

@@ -33,7 +33,9 @@ export class RoleService {
 				name: normalizedName,
 				permissions: permissionIds?.length
 					? {
-							create: permissionIds.map((permissionId) => ({ permissionId })),
+							create: permissionIds.map((permissionId) => ({
+								permission: { connect: { id: permissionId } },
+							})),
 						}
 					: undefined,
 			},
@@ -113,7 +115,9 @@ export class RoleService {
 				...(permissionIds !== undefined && {
 					permissions: {
 						deleteMany: {},
-						create: permissionIds.map((permissionId) => ({ permissionId })),
+						create: permissionIds.map((permissionId) => ({
+							permission: { connect: { id: permissionId } },
+						})),
 					},
 				}),
 			},
@@ -149,7 +153,9 @@ export class RoleService {
 			where: { id },
 			data: {
 				permissions: {
-					create: permissionIds.map((permissionId) => ({ permissionId })),
+					create: permissionIds.map((permissionId) => ({
+						permission: { connect: { id: permissionId } },
+					})),
 				},
 			},
 			include: {
@@ -218,7 +224,7 @@ export class RoleService {
 		}
 	}
 
-	async assignRoleToUser(userId: number, roleId: number) {
+	async assignRoleToUser(userId: string, roleId: number) {
 		const user = await this.prisma.user.findUnique({ where: { id: userId } });
 		if (!user) {
 			throw new BadRequestException(`User với ID ${userId} không tồn tại`);

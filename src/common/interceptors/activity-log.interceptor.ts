@@ -36,7 +36,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
 
 						await this.prisma.activityLog.create({
 							data: {
-								userId: userId ? Number(userId) : null,
+								userId: userId ? String(userId) : null,
 								action,
 								isSuccess: true,
 								module:
@@ -68,7 +68,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
 								isSuccess: false,
 								module:
 									moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
-								userId: userId ? Number(userId) : null,
+								userId: userId ? String(userId) : null,
 								details: {
 									url,
 									ip: request.ip,

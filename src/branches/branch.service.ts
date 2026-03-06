@@ -54,7 +54,7 @@ export class BranchesService {
 		};
 	}
 
-	async findOne(id: number) {
+	async findOne(id: string) {
 		const branch = await this.prisma.branch.findFirst({
 			where: { id, deletedAt: null },
 		});
@@ -64,7 +64,7 @@ export class BranchesService {
 		return branch;
 	}
 
-	async update(id: number, updateBranchDto: UpdateBranchDto) {
+	async update(id: string, updateBranchDto: UpdateBranchDto) {
 		await this.findOne(id);
 		return this.prisma.branch.update({
 			where: { id },
@@ -72,7 +72,7 @@ export class BranchesService {
 		});
 	}
 
-	async remove(id: number) {
+	async remove(id: string) {
 		await this.findOne(id);
 		return this.prisma.branch.update({
 			where: { id },

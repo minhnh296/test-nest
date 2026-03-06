@@ -43,7 +43,7 @@ export class UsersService {
 
 	async findAll(
 		currentUser?: {
-			id: number;
+			id: string;
 			role: string;
 			isSuperAdmin: boolean;
 		},
@@ -91,21 +91,22 @@ export class UsersService {
 			this.prisma.user.count({ where: whereClause }),
 		]);
 
-		const items = users.map(
-			({
+		const items = users.map((user) => {
+			const {
 				password,
 				isSuperAdmin,
 				branch,
 				role,
 				branchId,
 				roleId,
-				...user
-			}) => ({
-				...user,
+				...rest
+			} = user;
+			return {
+				...rest,
 				branch: branch?.name,
 				role: role?.name,
-			}),
-		);
+			};
+		});
 
 		return {
 			items,
@@ -115,7 +116,7 @@ export class UsersService {
 		};
 	}
 
-	async findById(id: number) {
+	async findById(id: string) {
 		const user = await this.prisma.user.findUnique({
 			where: { id },
 			include: {
@@ -133,7 +134,7 @@ export class UsersService {
 		};
 	}
 
-	async update(id: number, updateUserDto: UpdateUserDto) {
+	async update(id: string, updateUserDto: UpdateUserDto) {
 		const { password: rawPassword, ...userData } = updateUserDto;
 		const hashedPassword = rawPassword
 			? await bcrypt.hash(rawPassword, 10)
@@ -141,8 +142,8 @@ export class UsersService {
 
 		if ("branchId" in userData) {
 			userData.branchId = userData.branchId
-				? Number(userData.branchId)
-				: (null as unknown as number);
+				? userData.branchId
+				: (null as unknown as string);
 		}
 		if ("roleId" in userData) {
 			userData.roleId = userData.roleId
@@ -170,7 +171,7 @@ export class UsersService {
 		};
 	}
 
-	async remove(id: number) {
+	async remove(id: string) {
 		return this.prisma.user.delete({
 			where: { id },
 		});

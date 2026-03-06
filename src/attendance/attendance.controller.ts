@@ -3,7 +3,6 @@ import {
 	Controller,
 	Get,
 	Param,
-	ParseIntPipe,
 	Post,
 	Query,
 	Request,
@@ -76,7 +75,7 @@ export class AttendanceController {
 	})
 	@ApiResponse({ status: 200, description: "Thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy bản ghi" })
-	findOne(@Param("id", ParseIntPipe) id: number, @Request() req) {
+	findOne(@Param("id") id: string, @Request() req) {
 		return this.attendanceService.findOne(id, req.user);
 	}
 }

@@ -66,16 +66,16 @@ export class RoleController {
 	@ApiOperation({ summary: "Xóa permission" })
 	@ApiResponse({ status: 200, description: "Xóa permission thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy permission" })
-	removePermission(@Param("id") id: string) {
-		return this.roleService.removePermission(+id);
+	removePermission(@Param("id") id: number) {
+		return this.roleService.removePermission(id);
 	}
 
 	@Get(":id")
 	@ApiOperation({ summary: "Lấy thông tin chi tiết role" })
 	@ApiResponse({ status: 200, description: "Thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
-	findOne(@Param("id") id: string) {
-		return this.roleService.findOne(+id);
+	findOne(@Param("id") id: number) {
+		return this.roleService.findOne(id);
 	}
 
 	@Patch(":id")
@@ -84,16 +84,16 @@ export class RoleController {
 	@ApiResponse({ status: 400, description: "Dữ liệu đầu vào không hợp lệ" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
 	@ApiResponse({ status: 409, description: "Tên role đã tồn tại" })
-	update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto) {
-		return this.roleService.update(+id, updateRoleDto);
+	update(@Param("id") id: number, @Body() updateRoleDto: UpdateRoleDto) {
+		return this.roleService.update(id, updateRoleDto);
 	}
 
 	@Delete(":id")
 	@ApiOperation({ summary: "Xóa role" })
 	@ApiResponse({ status: 200, description: "Xóa role thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy role để xóa" })
-	remove(@Param("id") id: string) {
-		return this.roleService.remove(+id);
+	remove(@Param("id") id: number) {
+		return this.roleService.remove(id);
 	}
 
 	@Put(":id/permissions")
@@ -102,10 +102,10 @@ export class RoleController {
 	@ApiResponse({ status: 400, description: "Không tìm thấy role" })
 	@ApiBody({ type: AssignPermissionsDto })
 	assignPermissions(
-		@Param("id") id: string,
+		@Param("id") id: number,
 		@Body() body: AssignPermissionsDto,
 	) {
-		return this.roleService.assignPermissions(+id, body.permissionIds);
+		return this.roleService.assignPermissions(id, body.permissionIds);
 	}
 
 	@Post("assign-user")

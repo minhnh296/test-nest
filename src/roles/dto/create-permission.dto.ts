@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreatePermissionDto {
 	@ApiProperty({
-		example: "CREATE_USER",
+		example: "ACCESS",
 		description: "Tên định danh của quyền",
 	})
 	@IsString()
@@ -11,7 +11,7 @@ export class CreatePermissionDto {
 	name: string;
 
 	@ApiProperty({
-		example: "Quyền tạo người dùng mới",
+		example: "Quyền truy cập dữ liệu",
 		description: "Mô tả chi tiết quyền",
 		required: false,
 	})
