@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  db:
+    image: postgres
+    container_name: ${APPLICATION_NAME:-kim-thanh-jewelry}-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-root}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Admin@123}
+      POSTGRES_DB: ${POSTGRES_DB:-kim-thanh-jewelry}
+    restart: unless-stopped
+    ports:
+      - ${DB_PORT:-5432}:5432
+    volumes:
+      - postgresql:/var/lib/postgresql/
+    healthcheck:
+      test: pg_isready -d ${POSTGRES_DB:-kim-thanh-jewelry}
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  cache:
+    container_name: ${APPLICATION_NAME:-kim-thanh-jewelry}-cache
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - ${CACHE_PORT:-6379}:6379
+    environment:
+      - REDIS_PASSWORD=123456
+    command: redis-server --requirepass 123456 --appendonly yes
+
+volumes:
+  postgresql:
+  redis_data:
