@@ -1,12 +1,16 @@
+require("dotenv").config();
+
 module.exports = {
   apps: [
     {
-      name: 'kim-thanh-jewelry-app',
-      script: 'yarn build && yarn start:prod',
+      name: "kim-thanh-jewelry-app",
+      script: "node",
+      args: "dist/main.js",
       instances: 1,
-      exec_mode: 'fork',
+      exec_mode: "fork",
       env: {
-        PORT: 3001,
+        NODE_ENV: process.env.NODE_ENV || "production",
+        PORT: process.env.PORT || 3001,
       },
     },
   ],
