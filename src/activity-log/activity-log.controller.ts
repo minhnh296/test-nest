@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, ParseIntPipe } from "@nestjs/common";
+import { Controller, Get, Query, Param } from "@nestjs/common";
 import { ActivityLogService } from "./activity-log.service";
 import {
 	ApiTags,
@@ -19,7 +19,7 @@ export class ActivityLogController {
 	@ApiOperation({
 		summary: "Lấy danh sách nhật ký hoạt động (có phân trang và lọc)",
 	})
-	@ApiQuery({ name: "userId", required: false, type: Number })
+	@ApiQuery({ name: "userId", required: false, type: String })
 	@ApiQuery({ name: "action", required: false, enum: LogAction })
 	@ApiQuery({ name: "module", required: false, type: String })
 	@ApiQuery({
@@ -38,7 +38,7 @@ export class ActivityLogController {
 	@ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
 	@ApiResponse({ status: 200, description: "Thành công" })
 	async findAll(
-		@Query("userId") userId?: number,
+		@Query("userId") userId?: string,
 		@Query("action") action?: LogAction,
 		@Query("module") module?: string,
 		@Query("startDate") startDate?: string,
@@ -61,7 +61,7 @@ export class ActivityLogController {
 	@ApiOperation({ summary: "Xem chi tiết một bản ghi nhật ký" })
 	@ApiResponse({ status: 200, description: "Thành công" })
 	@ApiResponse({ status: 404, description: "Không tìm thấy" })
-	async findOne(@Param("id", ParseIntPipe) id: number) {
+	async findOne(@Param("id") id: string) {
 		return this.activityLogService.findOne(id);
 	}
 }

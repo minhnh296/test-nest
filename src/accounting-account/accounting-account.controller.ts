@@ -7,6 +7,7 @@ import {
 	Param,
 	Delete,
 	Query,
+	ParseIntPipe,
 } from "@nestjs/common";
 import {
 	ApiBearerAuth,
@@ -61,8 +62,8 @@ export class AccountingAccountController {
 	@ApiOperation({ summary: "Lấy thông tin chi tiết một tài khoản" })
 	@ApiResponse({ status: 200, description: "Thành công" })
 	@ApiResponse({ status: 400, description: "Không tìm thấy" })
-	findOne(@Param("id") id: string) {
-		return this.accountingAccountService.findOne(+id);
+	findOne(@Param("id", ParseIntPipe) id: number) {
+		return this.accountingAccountService.findOne(id);
 	}
 
 	@Patch(":id")
@@ -70,20 +71,17 @@ export class AccountingAccountController {
 	@ApiOperation({ summary: "Cập nhật tài khoản kế toán" })
 	@ApiResponse({ status: 200, description: "Cập nhật thành công" })
 	update(
-		@Param("id") id: string,
+		@Param("id", ParseIntPipe) id: number,
 		@Body() updateAccountingAccountDto: UpdateAccountingAccountDto,
 	) {
-		return this.accountingAccountService.update(
-			+id,
-			updateAccountingAccountDto,
-		);
+		return this.accountingAccountService.update(id, updateAccountingAccountDto);
 	}
 
 	@Delete(":id")
 	@Roles("admin")
 	@ApiOperation({ summary: "Xóa tài khoản kế toán" })
 	@ApiResponse({ status: 200, description: "Xóa thành công" })
-	remove(@Param("id") id: string) {
-		return this.accountingAccountService.remove(+id);
+	remove(@Param("id", ParseIntPipe) id: number) {
+		return this.accountingAccountService.remove(id);
 	}
 }

@@ -39,7 +39,7 @@ export class AttendanceService {
 		);
 	}
 
-	async checkIn(userId: number, dto: CheckInDto) {
+	async checkIn(userId: string, dto: CheckInDto) {
 		const now = new Date(),
 			today = this.getTodayVN();
 
@@ -90,7 +90,7 @@ export class AttendanceService {
 		};
 	}
 
-	async checkOut(userId: number, dto: CheckOutDto) {
+	async checkOut(userId: string, dto: CheckOutDto) {
 		const now = new Date(),
 			today = this.getTodayVN();
 
@@ -148,7 +148,7 @@ export class AttendanceService {
 		};
 	}
 
-	async getTodayStatus(userId: number) {
+	async getTodayStatus(userId: string) {
 		const today = this.getTodayVN();
 		const records = await this.prisma.attendance.findMany({
 			where: { userId, date: today },
@@ -172,7 +172,7 @@ export class AttendanceService {
 		};
 	}
 
-	async findAll(u: { id: number; role: string }, q: QueryAttendanceDto) {
+	async findAll(u: { id: string; role: string }, q: QueryAttendanceDto) {
 		const now = new Date(),
 			month = q.month ?? now.getMonth() + 1,
 			year = q.year ?? now.getFullYear();
@@ -233,7 +233,7 @@ export class AttendanceService {
 		};
 	}
 
-	async findOne(id: number, u: { id: number; role: string }) {
+	async findOne(id: string, u: { id: string; role: string }) {
 		const res = await this.prisma.attendance.findUnique({
 			where: { id },
 		});

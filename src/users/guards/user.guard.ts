@@ -14,9 +14,9 @@ export class UserGuard implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const user = request.user;
-		const targetUserId = Number(request.params.id);
+		const targetUserId = request.params.id;
 
-		if (!targetUserId) return true;
+		if (!targetUserId || targetUserId === "undefined") return true;
 		const targetUser = await this.prisma.user.findUnique({
 			where: { id: targetUserId },
 			include: { role: true },

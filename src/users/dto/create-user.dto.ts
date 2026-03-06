@@ -57,9 +57,13 @@ export class CreateUserDto {
 	@IsOptional()
 	roleId?: number;
 
-	@ApiPropertyOptional({ example: 2, description: "ID của Chi nhánh" })
+	@ApiPropertyOptional({
+		example: "uuid-branch-id",
+		description: "ID của Chi nhánh",
+	})
 	@IsOptional()
-	branchId?: number;
+	@IsString()
+	branchId?: string;
 
 	@ApiPropertyOptional({ example: 10000000, description: "Lương cơ bản" })
 	@IsOptional()

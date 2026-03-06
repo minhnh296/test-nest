@@ -90,7 +90,7 @@ enum GoldPriceSource {
 
 //-----//
 model User {
-  id           Int     @id @default(autoincrement())
+  id           String  @id @default(uuid())
   username     String
   email        String
   password     String
@@ -106,7 +106,7 @@ model User {
   roleId Int?  @map("role_id")
   role   Role? @relation(fields: [roleId], references: [id])
 
-  branchId Int?
+  branchId String?
   branch   Branch? @relation(fields: [branchId], references: [id])
 
   activities ActivityLog[]
@@ -120,7 +120,7 @@ model User {
 }
 
 model Branch {
-  id      Int        @id @default(autoincrement())
+  id      String     @id @default(uuid())
   name    String     @unique
   code    String     @unique
   address String?
@@ -136,14 +136,14 @@ model Branch {
 }
 
 model ActivityLog {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   action    LogAction
   module    String
   isSuccess Boolean   @default(true) @map("is_success")
   details   Json?
 
-  userId Int?  @map("user_id")
-  user   User? @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
 }
@@ -164,7 +164,7 @@ model Warehouse {
 }
 
 model Inventory {
-  id              Int             @id @default(autoincrement())
+  id              String          @id @default(uuid())
   name            String
   code            String          @unique
   qrCode          String          @unique
@@ -187,7 +187,7 @@ model Inventory {
 }
 
 model Customer {
-  id       Int           @id @default(autoincrement())
+  id       String        @id @default(uuid())
   name     String
   phoneNum String        @unique @map("phone_num")
   address  String?
@@ -204,19 +204,19 @@ model Customer {
 }
 
 model Invoice {
-  id            Int           @id @default(autoincrement())
+  id            String        @id @default(uuid())
   code          String        @unique
   total         Float         @default(0)
   paymentMethod PaymentMethod @map("payment_method")
   status        Status        @default(ACTIVE)
 
-  buyerId Int      @map("buyer_id")
+  buyerId String   @map("buyer_id")
   buyer   Customer @relation(fields: [buyerId], references: [id])
 
-  employeeId Int  @map("employee_id")
-  employee   User @relation(fields: [employeeId], references: [id])
+  employeeId String @map("employee_id")
+  employee   User   @relation(fields: [employeeId], references: [id])
 
-  itemId Int       @map("item_id")
+  itemId String    @map("item_id")
   item   Inventory @relation(fields: [itemId], references: [id])
 
   warranty Warranty?
@@ -227,14 +227,14 @@ model Invoice {
 }
 
 model Warranty {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   code        String   @unique
   startAt     DateTime @default(now()) @map("start_at")
   endAt       DateTime @map("end_at")
   description String?
   status      Status   @default(ACTIVE)
 
-  invoiceId Int     @unique @map("invoice_id")
+  invoiceId String  @unique @map("invoice_id")
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -243,7 +243,7 @@ model Warranty {
 }
 
 model Product {
-  id     Int           @id @default(autoincrement())
+  id     String        @id @default(uuid())
   code   String        @unique
   name   String
   type   String
@@ -304,10 +304,10 @@ model AccountingAccount {
 }
 
 model Attendance {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  userId Int  @map("user_id")
-  user   User @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
 
   date            DateTime         @db.Date
   checkIn         DateTime?        @map("check_in")
@@ -323,10 +323,10 @@ model Attendance {
 }
 
 model Payroll {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  userId Int  @map("user_id")
-  user   User @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
 
   month       Int
   year        Int

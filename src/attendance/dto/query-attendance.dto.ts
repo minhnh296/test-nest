@@ -20,7 +20,5 @@ export class QueryAttendanceDto {
 
 	@ApiPropertyOptional({ description: "ID nhân viên" })
 	@IsOptional()
-	@Type(() => Number)
-	@IsInt()
-	userId?: number;
+	userId?: string;
 }

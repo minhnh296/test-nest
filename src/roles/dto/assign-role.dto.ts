@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsNotEmpty } from "class-validator";
+import { IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class AssignRoleDto {
-	@ApiProperty({ example: 1, description: "ID của người dùng" })
-	@IsInt()
+	@ApiProperty({ example: "uuid-user-id", description: "ID của người dùng" })
+	@IsString()
 	@IsNotEmpty()
-	userId: number;
+	userId: string;
 
 	@ApiProperty({ example: 2, description: "ID của Role muốn gán" })
 	@IsInt()
