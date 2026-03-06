@@ -5,7 +5,7 @@ module.exports = {
     {
       name: "kim-thanh-jewelry-app",
       script: "node",
-      args: "dist/main.js",
+      args: "dist/src/main.js",
       instances: 1,
       exec_mode: "fork",
       env: {

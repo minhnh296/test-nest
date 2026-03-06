@@ -1,0 +1,55 @@
+name: Deploy to Server on Develop Branch
+
+on:
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy develop branch to server
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          PM2_APP_NAME: ${{ secrets.PM2_APP_NAME }}
+          GIT_BRANCH: ${{ github.ref_name }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DEPLOY_PATH,GIT_BRANCH,PM2_APP_NAME
+          script_stop: true
+          script: |
+            set -euo pipefail
+            set -x
+            if [ -z "$DEPLOY_PATH" ]; then
+              echo "DEPLOY_PATH env is required" >&2
+              exit 1
+            fi
+            if [ ! -d "$DEPLOY_PATH/.git" ]; then
+              echo "DEPLOY_PATH '$DEPLOY_PATH' is missing or not a git repo on the server" >&2
+              exit 1
+            fi
+            : "${GIT_BRANCH:=main}"
+            cd "$DEPLOY_PATH"
+            # Load nvm so node/yarn use the desired version in non-login shells.
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
+              . "$NVM_DIR/nvm.sh"
+              nvm use 24 || nvm install 24
+            fi
+            git fetch origin "$GIT_BRANCH" --prune
+            git checkout "$GIT_BRANCH"
+            BEFORE=$(git rev-parse HEAD)
+            git reset --hard "origin/$GIT_BRANCH"
+            git pull origin "$GIT_BRANCH"
+            AFTER=$(git rev-parse HEAD)
+            node -v || true
+            yarn -v || true
+            yarn install --frozen-lockfile
+            yarn prisma:push
+            yarn build
+            pm2 reload "${PM2_APP_NAME:-kim-thanh-jewelry-app}"
