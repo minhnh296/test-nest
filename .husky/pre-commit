@@ -1,1 +1,17 @@
-bunx lint-staged --no-stash
+if command -v bunx >/dev/null 2>&1; then
+  bunx lint-staged --no-stash
+elif command -v npx >/dev/null 2>&1; then
+  npx --no-install lint-staged
+else
+  echo "Error: missing bunx/npx to run lint-staged"
+  exit 1
+fi
+
+if command -v bun >/dev/null 2>&1; then
+  bun run build
+elif command -v yarn >/dev/null 2>&1; then
+  yarn build
+else
+  echo "Error: missing bun/yarn to run build"
+  exit 1
+fi

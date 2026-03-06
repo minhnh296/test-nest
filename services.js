@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 import ngrok from "@ngrok/ngrok";
 import * as dotenv from "dotenv";
 
