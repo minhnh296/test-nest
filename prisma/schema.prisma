@@ -83,6 +83,11 @@ enum LogAction {
   EXPORT @map("export")
 }
 
+enum GoldPriceSource {
+  SJC    @map("sjc")
+  MANUAL @map("manual")
+}
+
 //-----//
 model User {
   id           Int     @id @default(autoincrement())
@@ -131,14 +136,14 @@ model Branch {
 }
 
 model ActivityLog {
-  id       Int       @id @default(autoincrement())
-  action   LogAction
-  module   String
-  targetId Int?      @map("target_id")
-  details  Json?
+  id        Int       @id @default(autoincrement())
+  action    LogAction
+  module    String
+  isSuccess Boolean   @default(true) @map("is_success")
+  details   Json?
 
-  userId Int  @map("user_id")
-  user   User @relation(fields: [userId], references: [id])
+  userId Int?  @map("user_id")
+  user   User? @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
 }
@@ -350,19 +355,12 @@ model Setting {
 }
 
 model GoldPrice {
-  id         Int      @id @default(autoincrement())
-  type       String   @unique @map("type")
-  buy        Float    @default(0)
-  sell       Float    @default(0)
-  latestDate String?  @map("latest_date")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-}
+  id         Int             @id @default(autoincrement())
+  type       String          @map("type")
+  buy        Float           @default(0)
+  sell       Float           @default(0)
+  source     GoldPriceSource
+  latestDate String?         @map("latest_date")
 
-model GoldPriceHistory {
-  id   Int       @id @default(autoincrement())
-  type String    @map("type")
-  buy  Float     @default(0)
-  sell Float     @default(0)
-  date DateTime? @map("date")
+  createdAt DateTime @default(now()) @map("created_at")
 }

@@ -6,12 +6,10 @@ import {
 	HttpStatus,
 	Post,
 	Request,
-	UseGuards,
 } from "@nestjs/common";
 import { SignInDto } from "./dto/signIn.dto";
 import { AuthService } from "./auth.service";
 import { SignUpDto } from "./dto/signUp.dto";
-import { LocalAuthGuard } from "./guard/local-auth-guard";
 import { Public } from "./public.decorator";
 import {
 	ApiBearerAuth,
@@ -27,7 +25,6 @@ export class AuthController {
 	constructor(private authService: AuthService) {}
 
 	@Public()
-	@UseGuards(LocalAuthGuard)
 	@HttpCode(HttpStatus.OK)
 	@Post("login")
 	@ApiOperation({ summary: "Đăng nhập (Dùng được cả bằng username và email)" })
@@ -37,8 +34,8 @@ export class AuthController {
 		status: 401,
 		description: "Tài khoản hoặc mật khẩu không chính xác",
 	})
-	signIn(@Request() req) {
-		return req.user;
+	async signIn(@Body() signInDto: SignInDto) {
+		return this.authService.signIn(signInDto.username, signInDto.password);
 	}
 
 	@ApiBearerAuth()
